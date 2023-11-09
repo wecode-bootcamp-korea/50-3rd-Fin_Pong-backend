@@ -15,6 +15,14 @@ app.get('/ping',(req,res) => {
         message: 'pong'
     })
 })
+app.get("/", (req, res) => {
+  res.send(`
+  <a href="https://kauth.kakao.com/oauth/authorize?client_id=${process.env.CLIENT_ID}&redirect_uri=${process.env.SIGN_UP_REDIRECT_URI}&response_type=code">
+  <img src="https://developers.kakao.com/assets/img/about/logos/kakaolink/kakaolink_btn_medium.png" />
+</a>
+  `);
+});
+
 
 const server = http.createServer(app)
 
