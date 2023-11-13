@@ -2,8 +2,9 @@ const express = require('express');
 const router = express.Router();
 // const middleware = require('../middlewares/index')
 
-const settingRouter = require('./settingRouter')
+const flowRouter = require('./flowRouter')
 
-router.use('/setting', settingRouter.router)
+router.use('/flow', flowRouter.router)
+
 
 module.exports = router;
