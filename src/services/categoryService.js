@@ -2,7 +2,7 @@ const categoryDao = require('../models/categoryDao');
 const error = require('../utils/error');
 
 const getCategory = async (type) => {
-  const result = [];
+  let result = [];
   if (type === '지출') {
     for (let categoryId in [1, 2, 4]) {
       result.push(await categoryDao.getCategory(categoryId));
