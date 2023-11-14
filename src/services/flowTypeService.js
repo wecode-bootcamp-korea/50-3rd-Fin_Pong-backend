@@ -6,6 +6,9 @@ const getFlowTypes = async () => {
   if (flowTypes.length===0) {
     error.throwErr(404, 'NOT_FOUND_TYPE');
   }
+  else {
+    return flowTypes;
+  }
 }
 
 module.exports = { getFlowTypes }
