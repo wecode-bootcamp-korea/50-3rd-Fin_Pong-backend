@@ -1,7 +1,19 @@
 const flowDao = require('../models/flowDao')
+const middleWare = require('../middlewares/index')
 
-const search = async( familyId, year ) => {
-  return await flowDao.search( familyId, year )
+const search = async( data ) => {
+    const query1 = await middleWare.queryBuilder1( data )
+    const result1 = await flowDao.getConditionalGeneralInfo( query1 )
+    const query2 = await middleWare.queryBuilder2( data )
+    const result2 = await flowDao.getConditionalFixedInfo ( query2 )
+    
+    let result = []
+    if (data.dateOrder==='DESC'){
+      result = result1.concat(result2).sort((a,b) => b.date - a.date)
+    }else{
+      result = result1.concat(result2).sort((a,b) => a.date - b.date)
+    }
+    return result
 }
 
 const yearlyView = async( userId, familyId, year) => {
