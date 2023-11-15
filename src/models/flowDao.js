@@ -28,7 +28,7 @@ const getMonthlyIncomeByPrivate = async( userId, year ) => {
   `, [ userId, year ])
 }
 
-const getMonthlySpendingByFamily = async( familyId, year ) => {
+const getMonthlyGeneralSpendingByFamily = async( familyId, year ) => {
   return await appDataSource.query(`
     SELECT
       uf.family_id,
@@ -42,7 +42,21 @@ const getMonthlySpendingByFamily = async( familyId, year ) => {
 `, [ familyId, year ])
 }
 
-const getMonthlySpendingByPrivate = async( userId, year ) => {
+const getMonthlyFixedSpendingByFamily = async( familyId, year ) => {
+  return await appDataSource.query(`
+    SELECT
+      uf.family_id,
+      month,
+      sum(amount) AS spending
+    FROM fixed_money_flows fmf
+    JOIN users_families uf ON fmf.user_id = uf.user_id
+    WHERE fmf.flow_type_id = 2 AND uf.family_id = ? AND fmf.year = ?
+    GROUP BY month
+    ORDER BY month ASC;
+`, [ familyId, year ])
+}
+
+const getMonthlyGeneralSpendingByPrivate = async( userId, year ) => {
   return await appDataSource.query(`
     SELECT
       uf.user_id,
@@ -56,7 +70,21 @@ const getMonthlySpendingByPrivate = async( userId, year ) => {
 `, [ userId, year ])
 }
 
-const getThisMonthSpendingByFamily = async( familyId, year, month ) => {
+const getMonthlyFixedSpendingByPrivate = async( userId, year ) => {
+  return await appDataSource.query(`
+    SELECT
+      uf.user_id,
+      month,
+      sum(amount) AS spending
+    FROM fixed_money_flows fmf
+    JOIN users_families uf ON fmf.user_id = uf.user_id
+    WHERE fmf.flow_type_id = 2 AND uf.user_id = ? AND fmf.year = ? AND fmf.category_id = 3
+    GROUP BY month
+    ORDER BY month ASC;
+`, [ userId, year ])
+}
+
+const getThisMonthGeneralSpendingByFamily = async( familyId, year, month ) => {
   return await appDataSource.query(`
     SELECT
       uf.family_id,
@@ -73,7 +101,24 @@ const getThisMonthSpendingByFamily = async( familyId, year, month ) => {
   `, [ familyId, year, month ])
 }
 
-const getThisMonthSpendingByPrivate = async( userId, year, month ) => {
+const getThisMonthFixedSpendingByFamily = async( familyId, year, month ) => {
+  return await appDataSource.query(`
+    SELECT
+      uf.family_id,
+      c.category,
+      sum(amount) AS spending
+    FROM fixed_money_flows fmf
+    JOIN users_families uf ON uf.user_id = fmf.user_id
+    JOIN categories c ON fmf.category_id = c.id
+    WHERE uf.family_id = ?  AND fmf.year = ?
+                            AND fmf.month = ?
+                            AND fmf.flow_type_id = 2
+    GROUP BY c.category
+    ORDER BY fmf.month ASC;
+  `, [ familyId, year, month ])
+}
+
+const getThisMonthGeneralSpendingByPrivate = async( userId, year, month ) => {
   return await appDataSource.query(`
     SELECT
       mf.user_id,
@@ -86,6 +131,22 @@ const getThisMonthSpendingByPrivate = async( userId, year, month ) => {
                       AND mf.flow_type_id = 2
     GROUP BY c.category
     ORDER BY mf.month asc;
+`, [ userId, year, month ])
+}
+
+const getThisMonthFixedSpendingByPrivate = async( userId, year, month ) => {
+  return await appDataSource.query(`
+    SELECT
+      fmf.user_id,
+      c.category,
+      sum(amount) AS spending
+    FROM fixed_money_flows fmf
+    JOIN categories c on fmf.category_id = c.id
+    WHERE user_id = ? AND fmf.year = ?
+                      AND fmf.month = ?
+                      AND fmf.flow_type_id = 2
+    GROUP BY c.category
+    ORDER BY fmf.month asc;
 `, [ userId, year, month ])
 }
 
@@ -107,10 +168,14 @@ module.exports = {
   search,
   getMonthlyIncomeByFamily,
   getMonthlyIncomeByPrivate,
-  getMonthlySpendingByFamily,
-  getMonthlySpendingByPrivate,
-  getThisMonthSpendingByFamily,
-  getThisMonthSpendingByPrivate,
+  getMonthlyGeneralSpendingByFamily,
+  getMonthlyFixedSpendingByFamily,
+  getMonthlyGeneralSpendingByPrivate,
+  getMonthlyFixedSpendingByPrivate,
+  getThisMonthGeneralSpendingByFamily,
+  getThisMonthFixedSpendingByFamily,
+  getThisMonthGeneralSpendingByPrivate,
+  getThisMonthFixedSpendingByPrivate,
   getCategory,
   getConditionalGeneralInfo,
   getConditionalFixedInfo,
