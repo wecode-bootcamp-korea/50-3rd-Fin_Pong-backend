@@ -4,8 +4,15 @@ const middleWare = require('../middlewares/index')
 const search = async( data ) => {
     const query1 = await middleWare.queryBuilder1( data )
     const result1 = await flowDao.getConditionalGeneralInfo( query1 )
+    for (i=0; i<result1.length; i++){
+      result1[i].fixed_status = 0
+    }
+
     const query2 = await middleWare.queryBuilder2( data )
     const result2 = await flowDao.getConditionalFixedInfo ( query2 )
+    for (i=0; i<result2.length; i++){
+      result2[i].fixed_status = 1
+    }
     
     let result = []
     if (data.dateOrder==='DESC'){
@@ -19,16 +26,15 @@ const search = async( data ) => {
 const yearlyView = async( userId, familyId, year) => {
   let monthlyIncome = []
   let monthlySpending = []
-  if(userId === 0){
+  if(familyId){
     monthlyIncome =  await flowDao.getMonthlyIncomeByFamily( familyId, year )
     monthlySpending = await flowDao.getMonthlySpendingByFamily( familyId, year )
-  }else if (familyId === 0){
+  }else if (userId){
     monthlyIncome =  await flowDao.getMonthlyIncomeByPrivate( userId, year )
     monthlySpending = await flowDao.getMonthlySpendingByPrivate( userId, year )
   }
   
   const monthIndex = [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
-
   let incomeTable = {}
   for (let i = 0; i < monthIndex.length; i++) {
       incomeTable[monthIndex[i] + '월'] = 0
@@ -48,9 +54,9 @@ const yearlyView = async( userId, familyId, year) => {
 
 const categoryView = async( userId, familyId, year, month ) => {
   let result = []
-  if(userId === 0){
+  if(familyId){
     result = await flowDao.getThisMonthSpendingByFamily( familyId, year, month )
-  }else if (familyId === 0){
+  }else if (userId){
     result = await flowDao.getThisMonthSpendingByPrivate( userId, year, month )
   }
   const category = await flowDao.getCategory()

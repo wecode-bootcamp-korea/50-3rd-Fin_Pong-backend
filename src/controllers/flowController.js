@@ -34,19 +34,19 @@ const view = async(req, res) => {
     const userId = 1
 
     if (rule === 'year' && unit === 'family'){
-      const userId = 0
+      const userId = undefined
       const result = await flowServices.yearlyView( userId, familyId, year )
       res.status(200).json(result)
     }else if(rule === 'year' && unit === 'private'){
-      const familyId = 0
+      const familyId = undefined
       const result = await flowServices.yearlyView( userId, familyId, year )
       res.status(200).json(result)
     }else if(rule === 'category' && unit === 'family'){
-      const userId = 0
+      const userId = undefined
       const result = await flowServices.categoryView( userId, familyId, year, month )
       res.status(200).json(result)
     }else if(rule === 'category' && unit === 'private'){
-      const familyId = 0
+      const familyId = undefined
       const result = await flowServices.categoryView( userId, familyId, year, month )
       res.status(200).json(result)
     }else{
