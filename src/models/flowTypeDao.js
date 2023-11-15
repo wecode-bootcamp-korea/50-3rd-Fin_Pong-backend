@@ -7,7 +7,6 @@ const getFlowTypes = async () => {
     FROM flow_type
     `
   )
-
 }
 
 module.exports = { getFlowTypes }
