@@ -95,6 +95,14 @@ const getCategory = async() => {
 `)
 }
 
+const getConditionalGeneralInfo = async( query ) => {
+  return await appDataSource.query(query)
+}
+
+const getConditionalFixedInfo = async( query ) => {
+  return await appDataSource.query(query)
+}
+
 module.exports = {
   search,
   getMonthlyIncomeByFamily,
@@ -104,4 +112,6 @@ module.exports = {
   getThisMonthSpendingByFamily,
   getThisMonthSpendingByPrivate,
   getCategory,
+  getConditionalGeneralInfo,
+  getConditionalFixedInfo,
 }
