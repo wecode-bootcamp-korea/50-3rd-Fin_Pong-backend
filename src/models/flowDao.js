@@ -1,9 +1,5 @@
 const { appDataSource } = require('../utils/dataSource')
 
-const search = async( userId, date ) => {
-  
-}
-
 const getMonthlyIncomeByFamily = async( familyId, year ) => {
   return await appDataSource.query(`
     SELECT 
@@ -165,7 +161,6 @@ const getConditionalFixedInfo = async( query ) => {
 }
 
 module.exports = {
-  search,
   getMonthlyIncomeByFamily,
   getMonthlyIncomeByPrivate,
   getMonthlyGeneralSpendingByFamily,
