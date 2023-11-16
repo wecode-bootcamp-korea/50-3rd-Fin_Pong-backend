@@ -2,6 +2,7 @@ const jwt = require('jsonwebtoken');
 const userDao = require('../models/userDao');
 const error = require('./error');
 const secretKey = process.env.SECRET_KEY
+
 const loginRequired = async (req, res, next) => {
   try {
     const accessToken = req.headers.authorization.substr(7);
@@ -25,3 +26,4 @@ const loginRequired = async (req, res, next) => {
 module.exports = {
   loginRequired
 }
+
