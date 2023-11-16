@@ -2,21 +2,17 @@ const categoryDao = require('../models/categoryDao');
 const error = require('../utils/error');
 
 const getCategory = async (type) => {
-  let categoryIds = [1, 2, 4];
-  let result = []
-  if (type === '지출') {
-    for (let i = 0; i < 3; i++) {
-      let category = await categoryDao.getCategory(categoryIds[i]);
-      result[i] = await category[0];
-      result[i].type = type;
-    }
+  const categoryTypes = {
+    '지출' : [1, 2, 3],
+    '수입' : [4]
   }
-  else if (type === '수입') {
-    let category = await categoryDao.getCategory(3)
-    result[0] = await category[0]
-    result[0].type = type;
-  }
-  return result;
+
+  const categories = await categoryDao.getCategoriesByIds(categoryTypes[type]);
+  categories.map((category) => { category.type = type })
+
+  return categories;
 }
 
-module.exports = { getCategory}
+module.exports = {
+  getCategory
+}

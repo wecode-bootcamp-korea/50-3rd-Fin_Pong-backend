@@ -1,6 +1,6 @@
-const {DataSource} = require('typeorm');
-const dotenv = require('dotenv')
-dotenv.config()
+const { DataSource } = require('typeorm');
+const dotenv = require('dotenv');
+dotenv.config();
 
 const appDataSource = new DataSource({
   type : process.env.TYPEORM_CONNECTION,
@@ -13,10 +13,12 @@ const appDataSource = new DataSource({
 
 appDataSource.initialize()
   .then(() => {
-    console.log('Data Source has been initialized!')
+    console.log('Data Source has been initialized!');
   })
   .catch((err) => {
-    console.error('Error occured during Data Source initialization', err)
+    console.error('Error occured during Data Source initialization', err);
   })
 
-module.exports = { appDataSource }
+module.exports = {
+  appDataSource
+}

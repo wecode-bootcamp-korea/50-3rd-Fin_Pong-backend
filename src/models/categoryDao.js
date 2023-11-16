@@ -1,14 +1,16 @@
 const { appDataSource } = require('../utils/dataSource');
 
-const getCategory = async (categoryId) => {
+const getCategoriesByIds = async (categoryIds) => {
   return await appDataSource.query(
     `
     SELECT id, category as 'option'
     FROM categories
-    WHERE id = ?
+    WHERE id IN (?)
     `,
-    [categoryId]
+    [categoryIds]
   )
 }
 
-module.exports = { getCategory }
+module.exports = {
+  getCategoriesByIds
+}
