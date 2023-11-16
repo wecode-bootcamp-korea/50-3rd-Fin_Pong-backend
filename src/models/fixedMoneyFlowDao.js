@@ -44,8 +44,22 @@ const postMiddleFixedMoneyFlow = async (fixedMoneyFlowId, fixedMoneyFlowsGroupId
   return result;
 }
 
+const getFixedMoneyFlows = async(userId) => { // flow_type_id가 1이면 수입, 2이면 지출입니다.
+  console.log(userId)
+  return await appDataSource.query(
+    `
+    SELECT id, user_id, flow_type_id, category_id, memo, amount, year, month, date 
+    FROM fixed_money_flows 
+    WHERE user_id = ?
+    ORDER BY year DESC, month DESC, date DESC, amount DESC, flow_type_id, category_id
+    `,
+    [ userId ]
+  )
+}
+
 module.exports = {
   postFixedMoneyFlow,
   postFixedMoneyFlowsGroup,
-  postMiddleFixedMoneyFlow
+  postMiddleFixedMoneyFlow,
+  getFixedMoneyFlows
 }

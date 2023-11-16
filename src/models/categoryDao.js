@@ -11,6 +11,18 @@ const getIdByCategoryName = async (category) => {
   )
 }
 
+const getNameById = async (categoryId) => {
+  return await appDataSource.query(
+    `
+    SELECT category 
+    FROM categories 
+    WHERE id = ?
+    `,
+    [categoryId]
+  )
+}
+
 module.exports = {
-  getIdByCategoryName
+  getIdByCategoryName,
+  getNameById
 }

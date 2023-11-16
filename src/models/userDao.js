@@ -37,7 +37,19 @@ const getUserInformationById = async( userId ) => {
   }
 }
 
+const getNameById = async (userId) => {
+  return await appDataSource.query(
+    `
+    SELECT name
+    FROM users 
+    WHERE user_id = ?
+    `,
+    [userId]
+  )
+}
+
 module.exports = {
   getUserByEmail,
-  getUserInformationById
+  getUserInformationById,
+  getNameById
 }

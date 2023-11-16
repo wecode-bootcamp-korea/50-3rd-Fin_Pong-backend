@@ -1,4 +1,5 @@
 const fixedFlowService = require('../services/fixedMoneyFlowService');
+const userService = require('../services/userService');
 const categoryService = require('../services/categoryService');
 const error = require('../utils/error');
 
@@ -23,6 +24,21 @@ const postFixedFlows = async (req, res) => { // 관리자만 가능
   }
 }
 
+const getFixedMoneyFlows = async (req, res) => {
+  try {
+    const { userId, familyId, roleId } = req.userData;
+    if (!familyId || !roleId) {
+      error.throwErr(400, 'NOT_INCLUDED_IN_FAMILY_OR_NOT_AN_ADMIN');
+    }
+    const fixedMoneyFlows = await fixedFlowService.getFixedMoneyFlows(userId);
+    return res.status(200).json({message: 'GET_SUCCESS', fixedFlow: await fixedMoneyFlows});
+    } catch (err) {
+      console.error(err);
+      return res.status(err.statusCode || 500).json({message: err.message || 'INTERNAL_SERVER_ERROR'});
+    }
+}
+
 module.exports = {
-  postFixedFlows
+  postFixedFlows,
+  getFixedMoneyFlows
 }

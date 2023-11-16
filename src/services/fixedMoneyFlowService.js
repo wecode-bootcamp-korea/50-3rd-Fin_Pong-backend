@@ -1,4 +1,7 @@
-const fixedFlowDao = require('../models/fixedMoneyFlowDao');
+const fixedMoneyFlowDao = require('../models/fixedMoneyFlowDao');
+const categoryService = require('../services/categoryService');
+const userService = require('../services/userService')
+const flowTypeService = require('../services/flowTypeService')
 const error = require('../utils/error');
 
 const postFixedMoneyFlows = async (userId, type, categoryId, memo, amount, startYear, startMonth, startDate, endYear, endMonth) => {
@@ -22,23 +25,23 @@ const postFixedMoneyFlows = async (userId, type, categoryId, memo, amount, start
     for (let k = integerStartYear; k <= integerEndYear; k++) {
       if (k === integerStartYear) {
         for (let i = integerStartMonth; i <= 12; i++) {
-          result.push(await fixedFlowDao.postFixedMoneyFlow(userId, typeId, categoryId, memo, amount, k, i, integerStartDate));
+          result.push(await fixedMoneyFlowDao.postFixedMoneyFlow(userId, typeId, categoryId, memo, amount, k, i, integerStartDate));
         }
       }
       else if (integerStartYear < k < integerEndYear) {
         for (let l = 1; l <= 12; l++) {
-          result.push(await fixedFlowDao.postFixedMoneyFlow(userId, typeId, categoryId, memo, amount, k, l, integerStartDate));
+          result.push(await fixedMoneyFlowDao.postFixedMoneyFlow(userId, typeId, categoryId, memo, amount, k, l, integerStartDate));
         }
       }
       for (let n = 1; n <= integerEndMonth; n++) {
-        result.push(await fixedFlowDao.postFixedMoneyFlow(userId, typeId, categoryId, memo, amount, k, n, integerStartDate));
+        result.push(await fixedMoneyFlowDao.postFixedMoneyFlow(userId, typeId, categoryId, memo, amount, k, n, integerStartDate));
       }
     }
   }
   else if (integerEndYear === integerStartYear) {
     if (endMonth > integerStartMonth) {
       for (let m = integerStartMonth; m <= integerEndMonth; m++) {
-        result.push(await fixedFlowDao.postFixedMoneyFlow(userId, typeId, categoryId, memo, amount, integerStartYear, m, integerStartDate));
+        result.push(await fixedMoneyFlowDao.postFixedMoneyFlow(userId, typeId, categoryId, memo, amount, integerStartYear, m, integerStartDate));
       }
     }
     else {
@@ -48,23 +51,41 @@ const postFixedMoneyFlows = async (userId, type, categoryId, memo, amount, start
   else if (integerEndYear < integerStartYear) {
     error.throwErr(400, '마감년도는 시작년도 이후여야 합니다');
   }
-  // console.log(result);
   return result; // 결과값을 반환합니다. fixed_money_flows 에 POST 한 id 값들의 모음입니다.
 }
 
 const postFixedMoneyFlowsGroup = async () => {
-  return await fixedFlowDao.postFixedMoneyFlowsGroup(); // Dao 에서 만든 fixed_money_flows_group 의 insertId를 반환합니다.
+  return await fixedMoneyFlowDao.postFixedMoneyFlowsGroup(); // Dao 에서 만든 fixed_money_flows_group 의 insertId를 반환합니다.
 }
 
 const postMiddleFixedMoneyFlows = async (fixedMoneyFlowIds, fixedMoneyFlowsGroupId) => {
   for (let i = 0; i < fixedMoneyFlowIds.length; i++) {
-    await fixedFlowDao.postMiddleFixedMoneyFlow(fixedMoneyFlowIds[i], fixedMoneyFlowsGroupId);
+    await fixedMoneyFlowDao.postMiddleFixedMoneyFlow(fixedMoneyFlowIds[i], fixedMoneyFlowsGroupId);
   }
   return "SUCCESS";
+}
+
+const getFixedMoneyFlows = async (userId) => {
+  const flows = await fixedMoneyFlowDao.getFixedMoneyFlows(userId);
+  console.log(flows)
+  const mapped = await Promise.all(flows.map( async (flow) => ({
+      id: flow.id,
+      userName: await userService.getNameById(flow.user_id),
+      flowType: await flowTypeService.getFlowStatusById(flow.flow_type_id),
+      category: await categoryService.getNameById(flow.category_id),
+      memo: flow.memo,
+      amount: flow.amount,
+      year: flow.year,
+      month: flow.month,
+      date: flow.date,
+    }
+)));
+  return mapped;
 }
 
 module.exports = {
   postFixedMoneyFlows,
   postFixedMoneyFlowsGroup,
-  postMiddleFixedMoneyFlows
+  postMiddleFixedMoneyFlows,
+  getFixedMoneyFlows
 }

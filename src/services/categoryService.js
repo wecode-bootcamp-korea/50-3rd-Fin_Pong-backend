@@ -6,6 +6,12 @@ const getIdByCategoryName = async (category) => {
   return await result[0]['categoryId'];
 }
 
+const getNameById = async (categoryId) => {
+  const result = await categoryDao.getNameById(categoryId);
+  return result[0]['category'];
+}
+
 module.exports = {
-  getIdByCategoryName
+  getIdByCategoryName,
+  getNameById
 }
