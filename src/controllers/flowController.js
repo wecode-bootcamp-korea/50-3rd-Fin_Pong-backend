@@ -36,11 +36,11 @@ const view = async(req, res) => {
     if (rule === 'year' && unit === 'family'){
       const userId = undefined
       const result = await flowServices.yearlyView( userId, familyId, year )
-      res.status(200).json(result)
+      res.status(200).json({'INCOME' : result[0], 'SPENDING' : result[1]})
     }else if(rule === 'year' && unit === 'private'){
       const familyId = undefined
       const result = await flowServices.yearlyView( userId, familyId, year )
-      res.status(200).json(result)
+      res.status(200).json({'INCOME' : result[0], 'SPENDING' : result[1]})
     }else if(rule === 'category' && unit === 'family'){
       const userId = undefined
       const result = await flowServices.categoryView( userId, familyId, year, month )
