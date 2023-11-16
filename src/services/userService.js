@@ -1,6 +1,8 @@
 const userDao = require('../models/userDao');
 const jwt = require('jsonwebtoken');
 const axios = require('axios');
+const error = require('../utils/error');
+const secretKey = process.env.SECRET_KEY
 const dotenv = require('dotenv');
 dotenv.config();
 
@@ -24,7 +26,6 @@ const signInSignUp = async(code) => {
       Authorization: `Bearer ${kakaoAccessToken}`,
     },
   });
-
   if (!result || result.status !== 200) {
     const error = new Error('KAKAO_CONNECTION ERROR');
     error.statusCode = 400;
@@ -37,7 +38,7 @@ const signInSignUp = async(code) => {
   if(existingUser.length === 0) {
     const createUser = await userDao.createUserByEmail(email); 
     
-    const token = jwt.sign({email: email,id: createUser},process.env.SECRET_KEY);
+    const token = jwt.sign({email: email,id:createUser},secretKey);
     return {
     needsAdditionalInfo: true,
     message: 'LOG_IN_SUCCESS',
@@ -63,10 +64,9 @@ const signInSignUp = async(code) => {
 };
 
 const addInformation = async(name, phoneNumber ,birthdate, email) => {
-  try{ 
+  try { 
     return await userDao.addInformation(name, phoneNumber ,birthdate, email);
-  }catch(err){
-    console.log(err);
+  } catch(err) {
     throw err;
   }
 };

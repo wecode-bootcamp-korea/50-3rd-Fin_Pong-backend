@@ -1,30 +1,26 @@
 const jwt = require('jsonwebtoken');
 const userService = require('../services/userService');
 const userDao = require('../models/userDao')
+const error = require('./error')
+const secretKey = process.env.SECRET_KEY
 
 const loginRequired = async (req, res, next) => {
   try {
-    console.log("ddddd")
-    const accessToken = req.headers.authorization;
+    const accessToken = req.headers.authorization.substr(7);
     if (!accessToken) {
-      const error = new Error('NEED_ACCESS_TOKEN');
-      error.statusCode = 401;
-      return res.status(error.statusCode).json({ message: error.message });
+      error.throwErr(401, 'NEEDED_ACCESS_TOKEN');
     }
-    const payload = await jwt.verify(accessToken, process.env.SECRET_KEY);
-    const user = await userDao.getUserByEmail(payload);
-    console.log(user)
+    const payload = jwt.verify(accessToken, secretKey);
+    const [ user ] = await userDao.getUserByEmail(payload.email);
     if (!user) {
-      const error = new Error('USER_DOES_NOT_EXIST');
-      error.statusCode = 404;
-      return res.status(error.statusCode).json({ message: error.message });
+      error.throwErr(404, 'USER_DOES_NOT_EXIST');
     }
-    req.user = user;
+    const userInfo = await userDao.getUserInformationById( payload.id )
+    req.user = user
+    req.userData = userInfo;
     next();
-  } catch{
-    const eroor = new Error('INVALID_ACCESS_TOKEN');
-    eroor.statusCode = 401;
-    throw eroor
+  } catch(err){
+    res.status(err.statusCode || 500).json({message: err.message || 'INTERNAL_SERVER_ERRROR'})
   }
 };
 
