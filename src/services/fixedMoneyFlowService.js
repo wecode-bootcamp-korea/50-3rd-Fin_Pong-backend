@@ -67,7 +67,6 @@ const postMiddleFixedMoneyFlows = async (fixedMoneyFlowIds, fixedMoneyFlowsGroup
 
 const getFixedMoneyFlows = async (userId) => {
   const flows = await fixedMoneyFlowDao.getFixedMoneyFlows(userId);
-  console.log(flows)
   const mapped = await Promise.all(flows.map( async (flow) => ({
       id: flow.id,
       userName: await userService.getNameById(flow.user_id),

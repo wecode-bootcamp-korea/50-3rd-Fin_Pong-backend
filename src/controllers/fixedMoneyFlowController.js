@@ -31,7 +31,7 @@ const getFixedMoneyFlows = async (req, res) => {
       error.throwErr(400, 'NOT_INCLUDED_IN_FAMILY_OR_NOT_AN_ADMIN');
     }
     const fixedMoneyFlows = await fixedFlowService.getFixedMoneyFlows(userId);
-    return res.status(200).json({message: 'GET_SUCCESS', fixedFlow: await fixedMoneyFlows});
+    return res.status(200).json({message: 'GET_SUCCESS', fixedFlow: fixedMoneyFlows});
     } catch (err) {
       console.error(err);
       return res.status(err.statusCode || 500).json({message: err.message || 'INTERNAL_SERVER_ERROR'});
