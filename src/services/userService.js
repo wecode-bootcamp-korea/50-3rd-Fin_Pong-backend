@@ -37,7 +37,7 @@ const signInSignUp = async(code) => {
   if(existingUser.length === 0) {
     const createUser = await userDao.createUserByEmail(email); 
     
-    const token = jwt.sign({email: email,id: createUser},process.env.SECRET_KEY);
+    const token = jwt.sign({email: email,id: createUser},process.env.TYPEORM_SECRET_KEY);
     return {
     needsAdditionalInfo: true,
     message: 'LOG_IN_SUCCESS',
@@ -48,7 +48,7 @@ const signInSignUp = async(code) => {
   }
   else {
   //회원이면 로그인을 시키면서 토큰을 준다 ㅇㅋ?
-  const token = jwt.sign({email :email,id:existingUser[0].id},process.env.SECRET_KEY);
+  const token = jwt.sign({email :email,id:existingUser[0].id},process.env.TYPEORM_SECRET_KEY);
   return {
     needsAdditionalInfo: false,
     message: 'LOG_IN_SUCCESS',
