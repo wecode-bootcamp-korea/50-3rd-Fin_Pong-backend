@@ -1,5 +1,19 @@
 const { appDataSource } = require('../utils/dataSource');
 
+const getUserInfo = async(userId) => {
+  return await appDataSource.query(`
+    SELECT
+      u.name AS userName, 
+      uf.role_id AS roleId
+    FROM users u 
+    JOIN users_families uf
+    ON u.id = uf.user_id
+    WHERE u.id = ?;
+    `, 
+    [userId]
+    )
+};
+
 const getUserByEmail = async(email) => {
   return await appDataSource.query(
     `
@@ -19,13 +33,11 @@ const createUserByEmail = async(email) => {
     `,
     [email]
     );
-
   if (result.insertId === 0) {
   error.throwErr(500, 'DATA_INSERTION_FAILED');
   }
   return result.insertId;
 };
-
 
 const addInformation = async(name, phoneNumber ,birthdate, email) => {
   
@@ -36,7 +48,7 @@ const addInformation = async(name, phoneNumber ,birthdate, email) => {
     WHERE email = ?
     `,
     [name, phoneNumber, birthdate, email]
-  )
+    );
   if (result.affectedRows === 0) {
     error.throwErr(500, 'DATA_INSERTION_FAILED');
   }
@@ -64,11 +76,12 @@ const getUserInformationById = async( userId ) => {
   } else {
     return result1;
   }
-}
+};
 
 module.exports = {
   getUserByEmail,
   createUserByEmail,
   addInformation,
   getUserInformationById,
+  getUserInfo,
 }

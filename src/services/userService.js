@@ -1,9 +1,9 @@
 const userDao = require('../models/userDao');
 const jwt = require('jsonwebtoken');
 const axios = require('axios');
-const error = require('../utils/error');
-const secretKey = process.env.SECRET_KEY
 const dotenv = require('dotenv');
+const secretKey = process.env.TYPEORM_SECRET_KEY;
+
 dotenv.config();
 
 const signInSignUp = async(code) => {
@@ -33,7 +33,6 @@ const signInSignUp = async(code) => {
   };
   
   const email = result.data.kakao_account.email
-  //존재유무를 확인해보자(이메일로)
   const existingUser = await userDao.getUserByEmail(email);
   if(existingUser.length === 0) {
     const createUser = await userDao.createUserByEmail(email); 
@@ -46,9 +45,7 @@ const signInSignUp = async(code) => {
     email: email,
     id: createUser
     };
-  }
-  else {
-  //회원이면 로그인을 시키면서 토큰을 준다 ㅇㅋ?
+  } else {
   const token = jwt.sign({email :email,id:existingUser[0].id},process.env.SECRET_KEY);
   return {
     needsAdditionalInfo: false,
@@ -71,7 +68,13 @@ const addInformation = async(name, phoneNumber ,birthdate, email) => {
   }
 };
 
+const userInfo = async(userId) => {
+  const [result] =  await userDao.getUserInfo(userId)
+  return result
+};
+
 module.exports = {
   signInSignUp,
-  addInformation
+  addInformation,
+  userInfo,
 }

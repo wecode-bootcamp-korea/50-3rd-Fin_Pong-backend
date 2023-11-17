@@ -10,11 +10,6 @@ app.use(cors())
 app.use(express.json())
 app.use(routes)
 
-app.get('/ping',(req,res) => {
-    res.status(200).json({
-        message: 'pong'
-    })
-})
 app.get("/signup", (req, res) => {
   res.send(`
   <a href="https://kauth.kakao.com/oauth/authorize?client_id=${process.env.REST_API_KEY}&redirect_uri=${process.env.SIGN_UP_REDIRECT_URI}&response_type=code">
@@ -40,7 +35,7 @@ const start = async () => {
     } catch (err) { 
       console.error(err)
     }
-  }
+  };
 
 start()
 

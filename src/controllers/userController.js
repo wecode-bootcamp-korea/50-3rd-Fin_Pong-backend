@@ -32,7 +32,19 @@ const addInformation = async(req, res)=>{
   } 
 };
 
+const userInfo = async(req, res) => {
+  try{
+    const userId = req.userData.userId
+    const result = await userService.userInfo(userId)
+    return res.status(200).json(result)
+  } catch(err) {
+    console.error(err);
+    return res.status(500 || err.statusCode).json({message: 'ERROR_OCCURED'});
+  }
+};
+
 module.exports = {
   signInSignUp,
-  addInformation
+  addInformation,
+  userInfo,
 }

@@ -1,8 +1,7 @@
 const jwt = require('jsonwebtoken');
-const userService = require('../services/userService');
 const userDao = require('../models/userDao')
 const error = require('./error')
-const secretKey = process.env.SECRET_KEY
+const secretKey = process.env.TYPEORM_SECRET_KEY
 
 const loginRequired = async (req, res, next) => {
   try {
@@ -19,7 +18,7 @@ const loginRequired = async (req, res, next) => {
     req.user = user
     req.userData = userInfo;
     next();
-  } catch(err){
+  } catch(err) {
     res.status(err.statusCode || 500).json({message: err.message || 'INTERNAL_SERVER_ERRROR'})
   }
 };
