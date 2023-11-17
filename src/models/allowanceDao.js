@@ -10,7 +10,7 @@ const postAllowance = async (userId, amount, year, month) => {
     [userId, amount, year, month]
   )
   if (result.affectedRows === 0) {
-    error.throwErr(500, 'ALLOWANCE_ALREADY_EXISTS');
+    error.throwErr(409, 'ALREADY_EXISTS');
   }
   return result;
 }
@@ -29,8 +29,7 @@ const getAllowance = async (userId) => { // 최신 순
   )
 }
 
-
-const updateAllowances = async (userId, amount, year, month) => {
+const updateAllowance = async (userId, amount, year, month) => {
   return await appDataSource.query(
     `
     UPDATE allowances 
@@ -41,6 +40,21 @@ const updateAllowances = async (userId, amount, year, month) => {
     `,
     [amount, userId, year, month]
   )
+}
+
+const updateAllowanceById = async (allowanceId, amount, year, month) => {
+  const result = await appDataSource.query(
+    `
+    UPDATE allowances 
+    SET amount = ?, year = ?, month = ?
+    WHERE id = ? 
+    `,
+    [amount, year, month, allowanceId]
+  )
+  if (result.affectedRows === 0) {
+    error.throwErr(409, 'ALREADY_EXISTS');
+  }
+  return result;
 }
 
 const getAllowanceByYearMonth = async (userId, year, month) => {
@@ -57,7 +71,6 @@ const getAllowanceByYearMonth = async (userId, year, month) => {
 }
 
 const deleteAllowance = async (userId, year, month) => {
-  console.log(userId, year, month)
   const result = await appDataSource.query(
     `
     DELETE FROM allowances 
@@ -68,7 +81,21 @@ const deleteAllowance = async (userId, year, month) => {
     [userId, year, month]
   )
   if (result.affectedRows === 0) {
-    error.throwErr(500, 'NOT_EXISTING_OR_DELETED_ALLOWANCE');
+    error.throwErr(404, 'NOT_EXISTING_OR_DELETED_ALLOWANCE');
+  }
+  return result;
+}
+
+const deleteAllowanceById = async (allowanceId) => {
+  const result = await appDataSource.query(
+    `
+    DELETE FROM allowances 
+    WHERE id = ? 
+    `,
+    [allowanceId]
+  )
+  if (result.affectedRows === 0) {
+    error.throwErr(404, 'NOT_EXISTING_OR_DELETED_ALLOWANCE');
   }
   return result;
 }
@@ -76,7 +103,9 @@ const deleteAllowance = async (userId, year, month) => {
 module.exports = {
   postAllowance,
   getAllowance,
-  updateAllowances,
+  updateAllowance,
+  updateAllowanceById,
   getAllowanceByYearMonth,
-  deleteAllowance
+  deleteAllowance,
+  deleteAllowanceById
 }
