@@ -1,5 +1,17 @@
 const { appDataSource } = require('../utils/dataSource');
 
+const getUserInfo = async(userId) => {
+  return await appDataSource.query(`
+    SELECT
+      u.name AS userName, 
+      uf.role_id AS roleId
+    FROM users u 
+    JOIN users_families uf
+    ON u.id = uf.user_id
+    WHERE u.id = ?;
+  `, [userId])
+}
+
 const getUserByEmail = async(email) => {
   const result = await appDataSource.query(
     `
@@ -81,5 +93,6 @@ module.exports = {
   getUserByEmail,
   createUserByEmail,
   addInformation,
-  getUserInformationById
+  getUserInformationById,
+  getUserInfo,
 }

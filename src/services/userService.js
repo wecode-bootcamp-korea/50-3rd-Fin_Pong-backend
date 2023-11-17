@@ -71,7 +71,13 @@ const addInformation = async(name, phoneNumber ,birthdate, email) => {
   }
 };
 
+const userInfo = async(userId) => {
+  const [result] =  await userDao.getUserInfo(userId)
+  return result
+}
+
 module.exports = {
   signInSignUp,
-  addInformation
+  addInformation,
+  userInfo,
 }
