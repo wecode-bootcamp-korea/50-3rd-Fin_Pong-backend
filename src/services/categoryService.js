@@ -3,7 +3,7 @@ const error = require('../utils/error');
 
 const getCategory = async (type) => {
   const categoryTypes = {
-    '지출' : [1, 2, 3, 4],
+    '지출' : [1, 2, 3],
     '수입' : [4]
   }
 
