@@ -2,7 +2,7 @@ const flowServices = require('../services/flowService')
 
 const search = async(req,res) => {
   try{
-    const familyId = 1
+    const familyId = req.userData.familyId
     if(!req.query.year || !req.query.month ){
       const err = new Error('KEY_ERROR')
       err.status = 400
@@ -29,8 +29,8 @@ const search = async(req,res) => {
 
 const view = async(req, res) => {
   try{
-    const familyId = 1
-    const userId = 1
+    const familyId = req.userData.familyId
+    const userId = req.userData.userId
     if(!req.query.rule || !req.query.year || !req.query.unit){
       const err = new Error('KEY_ERROR')
       err.status = 400
