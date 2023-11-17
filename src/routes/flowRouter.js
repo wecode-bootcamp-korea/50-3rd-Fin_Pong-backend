@@ -1,10 +1,11 @@
 const express = require('express');
-const flowController = require('../controllers/flowController');
-
 const router = express.Router();
 
-router.get('/search', flowController.search );
-router.get('/view', flowController.view );
+const flowController = require('../controllers/flowController');
+const { loginRequired } = require('../utils/auth');
+
+router.get('/search', loginRequired, flowController.search );
+router.get('/view', loginRequired, flowController.view );
 
 module.exports = {
   router,
