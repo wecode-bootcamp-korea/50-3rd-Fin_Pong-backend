@@ -11,7 +11,7 @@ const postBudget = async (familyId, budget, year, month) => {
       [familyId, budget, year, month]
     )
     if (result.affectedRows === 0) {
-      error.throwErr(500, 'DUPLICATED_BUDGET_IGNORED');
+      error.throwErr(409, 'ALREADY_EXISTS');
     }
     return result;
   } catch (err) {
