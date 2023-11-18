@@ -79,4 +79,4 @@ const view = async(req, res) => {
 module.exports = {
   search,
   view,
-}
+};
