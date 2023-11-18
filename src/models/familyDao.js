@@ -2,19 +2,17 @@ const { appDataSource } = require('../utils/dataSource');
 
 const insertUuid  = async(uuid) => {
   const result = await appDataSource.query(`
-    INSERT INTO
-    families(auth_code)
+    INSERT INTO families(auth_code)
     VALUES( ? );
   `,
   [ uuid ])
   return result.insertId;
-  
 }
 
 const insertUserFamilyId = async(userData, familyId) => {
   const result = await appDataSource.query(`
     INSERT INTO users_families(user_id, family_id, role_id)
-    VALUES( ?, ?, ? )
+    VALUES( ?, ?, ? );
   `,
   [ userData.userId, familyId, 1 ])
   if (result.insertId === 0) {
@@ -30,7 +28,6 @@ const findFamilyId = async(authCode) => {
     FROM families WHERE auth_code = ?;
   `,
   [ authCode ])
-  
 }
 
 const addFamilyBook = async(userId, familyId) => {

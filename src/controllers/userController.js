@@ -17,16 +17,15 @@ const signInSignUp = async (req, res) => {
   }
 };
 
-//추가 정보
 const addInformation = async(req, res)=>{
   try {
-  const email = req.user[0].email;
+  const email = req.user.email;
   const {name, phoneNumber ,birthdate} = req.body;
   if(!name || !phoneNumber || !birthdate){
     const error = new Error('KEY_ERROR');
     error.statusCode = 400;
     throw error;
-  }
+  } console.log()
   await userService.addInformation(name, phoneNumber ,birthdate, email);
   return res.status(201).json({message:'ADD_INFORMATION_SUCCESS'});
   } catch(err) {
@@ -39,15 +38,13 @@ const userInfo = async(req, res) => {
   try{
     const userId = req.userData.userId
     const result = await userService.userInfo(userId)
-    
+    console.log()
     res.status(200).json(result)
   }catch(err){
     console.error(err);
     return res.status(500 || err.statusCode).json({message: 'ERROR_OCCURED'});
   }
-
-
-}
+};
 
 module.exports = {
   signInSignUp,

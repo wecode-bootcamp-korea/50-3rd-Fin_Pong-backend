@@ -6,7 +6,6 @@ const secretKey = process.env.TYPEORM_SECRET_KEY
 const loginRequired = async (req, res, next) => {
   try {
     const accessToken = req.headers.authorization.substr(7);
-    
     if (!accessToken) {
       error.throwErr(401, 'NEEDED_ACCESS_TOKEN');
     }
@@ -19,7 +18,7 @@ const loginRequired = async (req, res, next) => {
     req.user = user
     req.userData = userInfo;
     next();
-  } catch(err){
+  } catch(err) {
     res.status(err.statusCode || 500).json({message: err.message || 'INTERNAL_SERVER_ERRROR'})
   }
 };

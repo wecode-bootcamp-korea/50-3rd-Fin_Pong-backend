@@ -37,11 +37,9 @@ const createUserByEmail = async(email) => {
     `,
     [email]
     );
-
   if (result.insertId === 0) {
   error.throwErr(500, 'DATA_INSERTION_FAILED');
-  }
-  else {
+  } else {
     return result.insertId;
   }
 };
@@ -58,16 +56,10 @@ const addInformation = async(name, phoneNumber ,birthdate, email) => {
     `,
     [name, phoneNumber, birthdate, email]
     )
-  if (result.insertId === 0) {
-  error.throwErr(500, 'DATA_INSERTION_FAILED');
-  }
-  else {
     return result;
-  }
 };
 
 const getUserInformationById = async( userId ) => {
-  
   const [ result ] = await appDataSource.query(`
     SELECT id AS userId
     FROM users

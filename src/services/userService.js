@@ -24,7 +24,6 @@ const signInSignUp = async(code) => {
       Authorization: `Bearer ${kakaoAccessToken}`,
     },
   });
-
   if (!result || result.status !== 200) {
     const error = new Error('KAKAO_CONNECTION ERROR');
     error.statusCode = 400;
@@ -32,11 +31,9 @@ const signInSignUp = async(code) => {
   };
   
   const email = result.data.kakao_account.email
-  //존재유무를 확인해보자(이메일로)
   const existingUser = await userDao.getUserByEmail(email);
   if(existingUser.length === 0) {
     const createUser = await userDao.createUserByEmail(email); 
-    
     const token = jwt.sign({email: email,id: createUser},process.env.TYPEORM_SECRET_KEY);
     return {
     needsAdditionalInfo: true,
@@ -45,9 +42,7 @@ const signInSignUp = async(code) => {
     email: email,
     id: createUser
     };
-  }
-  else {
-  //회원이면 로그인을 시키면서 토큰을 준다 ㅇㅋ?
+  } else {
   const token = jwt.sign({email :email,id:existingUser[0].id},process.env.TYPEORM_SECRET_KEY);
   return {
     needsAdditionalInfo: false,
@@ -63,9 +58,9 @@ const signInSignUp = async(code) => {
 };
 
 const addInformation = async(name, phoneNumber ,birthdate, email) => {
-  try{ 
+  try{
     return await userDao.addInformation(name, phoneNumber ,birthdate, email);
-  }catch(err){
+  } catch(err) {
     console.log(err);
     throw err;
   }

@@ -1,7 +1,6 @@
 const familyDao = require('../models/familyDao');
 const middleWare = require('../middlewares/index');
 
-
 const newBook = async(userData) => {
   const uuid = await middleWare.makeUuid();
   const familyId = await familyDao.insertUuid( uuid );
