@@ -56,6 +56,9 @@ const addInformation = async(name, phoneNumber ,birthdate, email) => {
     `,
     [name, phoneNumber, birthdate, email]
     )
+    if (result.affectedRows === 0) {
+      error.throwErr(500, 'DATA_INSERTION_FAILED');
+    }
     return result;
 };
 
