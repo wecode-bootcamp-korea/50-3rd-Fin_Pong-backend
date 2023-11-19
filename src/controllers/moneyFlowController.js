@@ -1,82 +1,128 @@
-const moneyFlowService = require('../services/moneyFlowService');
-const categoryService = require('../services/categoryService')
+const moneyFlowDao = require('../models/moneyFlowDao');
+const userService = require('../services/userService');
+const flowTypeService = require('../services/flowTypeService');
+const categoryService = require('../services/categoryService');
 const error = require('../utils/error');
 
-const postMoneyFlow = async (req, res) => {
-  try {
-    const { userId, familyId } = req.userData;
-    if (!familyId) {
-      error.throwErr(400, 'NOT_INCLUDED_IN_FAMILY');
-    }
-    const { type, category, memo, amount, year, month, date } = req.body;
-    const categoryId = await categoryService.getIdByCategoryName(category);
-    await moneyFlowService.postMoneyFlow(userId, type, categoryId, memo, amount, year, month, date);
-    return res.status(200).json({message: 'POST_SUCCESS'})
-  } catch (err) {
-    console.error(err);
-    return res.status(err.statusCode || 500).json({message: err.message || 'INTERNAL_SERVER_ERROR'});
+const postMoneyFlow = async (userId, type, categoryId, memo, amount, year, month, date) => {
+  let typeId = 1;
+  switch (type) {
+    case '수입':
+      break;
+    case '지출':
+      typeId += 1;
+      break;
+    default:
+      error.throwErr('NOT_FOUND_TYPE')
   }
+  return await moneyFlowDao.postMoneyFlow(userId, typeId, categoryId, memo, amount, year, month, date);
 }
 
-getMoneyFlowsByCondition = async (req, res) => {
-  try {
-    const { userId } = req.userData;
-    const { month, year, date } = req.query;
-    if (!year && (month || date)) { // 연도가 없고 월, 날짜 조건이 있는 경우  => 연도를 입력해 주세요
-      error.throwErr(400, 'KEY_ERROR_SELECT_A_YEAR');
+const getMoneyFlowsByUserId = async (userId) => {
+  const flows = await moneyFlowDao.getMoneyFlowsByUserId(userId);
+  return await Promise.all(flows.map( async (flow) => ({
+      id: flow.id,
+      userName: await userService.getNameById(flow.user_id),
+      flowType: await flowTypeService.getFlowStatusById(flow.flow_type_id),
+      category: await categoryService.getNameById(flow.category_id),
+      memo: flow.memo,
+      amount: flow.amount,
+      year: flow.year,
+      month: flow.month,
+      date: flow.date,
     }
-    else if (!year && !month && !date) { // 연도, 월, 날짜의 조건이 없는 경우 => 해당 유저의 수입/지출내역을 모두 찾습니다.
-      const moneyFlows = await moneyFlowService.getMoneyFlowsByUserId(userId);
-      return res.status(200).json({message: 'GET_SUCCESS', flows: moneyFlows});
-    }
-    else if (year && !month && !date) { // 연도 조건만 있고, 월, 날짜 조건은 없는 경우 => 해당 유저의 해당 연도의 모든 수입/지출 내역을 찾습니다.
-      const moneyFlows = await moneyFlowService.getMoneyFlowsByUserIdByYear(userId, year);
-      return res.status(200).json({message: 'GET_SUCCESS', flows: moneyFlows});
-    }
-    else if (year && month && !date) { // 연도, 월 조건만 있고, 날짜 조건은 없는 경우
-      const moneyFlows = await moneyFlowService.getMoneyFlowsByUserIdByYearMonth(userId, year, month); // 해당 유저의 해당 연, 월의 수입/지출 내역을 찾습니다.
-      return res.status(200).json({message: 'GET_SUCCESS', flows: moneyFlows});
-    }
-    else if (year && !month && date) { // 월 조건만 없고, 연, 날짜 조건만 있는 경우 (ex.2023년의 매달 1일에 무엇을 쓰고 벌었는 지 알려줘)
-      const moneyFlows = await moneyFlowService.getMoneyFlowsByUserIdByYearDate(userId, year, date); // 해당 유저의 해당 연도의 해당 날짜의 수입/지출 내역들을 찾습니다.
-      return res.status(200).json({message: 'GET_SUCCESS', flows: moneyFlows});
-    }
-    const moneyFlows = await moneyFlowService.getMoneyFlowsByUserIdByYearMonthDate(userId, year, month, date); // 해당 유저의 해당 연, 월, 날짜의 수입/지출 내역을 찾습니다.
-    return res.status(200).json({message: 'GET_SUCCESS', flows: moneyFlows});
-  } catch (err) {
-    console.error(err);
-    return res.status(err.statusCode || 500).json({message: err.message || 'INTERNAL_SERVER_ERROR'});
-  }
+  )))
 }
 
-const updateMoneyFlow = async (req, res) => {
-  try {
-    const { userId } = req.userData;
-    const { id, type, category, memo, amount, year, month, date } = req.body;
-    const categoryId = await categoryService.getIdByCategoryName(category);
-    await moneyFlowService.updateMoneyFlow(id, userId, type, categoryId, memo, amount, year, month, date);
-    return res.status(200).json({message: 'PUT_SUCCESS'})
-  } catch (err) {
-    console.error(err);
-    return res.status(err.statusCode || 500).json({message: err.message || 'INTERNAL_SERVER_ERROR'});
-  }
+const getMoneyFlowsByUserIdByYear = async (userId, year) => {
+  const flows = await moneyFlowDao.getMoneyFlowsByUserIdByYear(userId, year);
+  return await Promise.all(flows.map( async (flow) => ({
+      id: flow.id,
+      userName: await userService.getNameById(flow.user_id),
+      flowType: await flowTypeService.getFlowStatusById(flow.flow_type_id),
+      category: await categoryService.getNameById(flow.category_id),
+      memo: flow.memo,
+      amount: flow.amount,
+      year: flow.year,
+      month: flow.month,
+      date: flow.date,
+    }
+  )))
 }
 
-const deleteMoneyFlow = async (req, res) => {
-  try{
-    const { userId } = req.userData;
-    const { id } = req.body;
-    await moneyFlowService.deleteMoneyFlow(id);
-    return res.status(200).json({message: 'DELETE_SUCCESS'});
-  } catch (err) {
-    console.error(err);
-    return res.status(err.statusCode || 500).json({message: err.message || 'INTERNAL_SERVER_ERROR'});
+const getMoneyFlowsByUserIdByYearMonth = async (userId, year, month) => {
+  const flows = await moneyFlowDao.getMoneyFlowsByUserIdByYearMonth(userId, year, month);
+  return await Promise.all(flows.map( async (flow) => ({
+      id: flow.id,
+      userName: await userService.getNameById(flow.user_id),
+      flowType: await flowTypeService.getFlowStatusById(flow.flow_type_id),
+      category: await categoryService.getNameById(flow.category_id),
+      memo: flow.memo,
+      amount: flow.amount,
+      year: flow.year,
+      month: flow.month,
+      date: flow.date,
+    }
+  )))
+}
+
+const getMoneyFlowsByUserIdByYearDate = async (userId, year, date) => {
+  const flows = await moneyFlowDao.getMoneyFlowsByUserIdByYearDate(userId, year, date);
+  return await Promise.all(flows.map( async (flow) => ({
+      id: flow.id,
+      userName: await userService.getNameById(flow.user_id),
+      flowType: await flowTypeService.getFlowStatusById(flow.flow_type_id),
+      category: await categoryService.getNameById(flow.category_id),
+      memo: flow.memo,
+      amount: flow.amount,
+      year: flow.year,
+      month: flow.month,
+      date: flow.date,
+    }
+  )))
+}
+
+const getMoneyFlowsByUserIdByYearMonthDate = async (userId, year, month, date) => {
+  const flows = await moneyFlowDao.getMoneyFlowsByUserIdByYearMonthDate(userId, year, month, date);
+  return await Promise.all(flows.map( async (flow) => ({
+      id: flow.id,
+      userName: await userService.getNameById(flow.user_id),
+      flowType: await flowTypeService.getFlowStatusById(flow.flow_type_id),
+      category: await categoryService.getNameById(flow.category_id),
+      memo: flow.memo,
+      amount: flow.amount,
+      year: flow.year,
+      month: flow.month,
+      date: flow.date,
+    }
+  )))
+}
+
+const updateMoneyFlow = async (id, userId, type, categoryId, memo, amount, year, month, date) => {
+  let typeId = 1;
+  switch (type) {
+    case '수입':
+      break;
+    case '지출':
+      typeId += 1;
+      break;
+    default:
+      error.throwErr('NOT_FOUND_TYPE')
   }
+  return await moneyFlowDao.updateMoneyFlow(id, userId, typeId, categoryId, memo, amount, year, month, date);
+}
+
+const deleteMoneyFlow = async (id, userId) => {
+  return await moneyFlowDao.deleteMoneyFlow(id, userId);
 }
 
 module.exports = {
   postMoneyFlow,
-  getMoneyFlowsByCondition,
+  getMoneyFlowsByUserId,
+  getMoneyFlowsByUserIdByYear,
+  getMoneyFlowsByUserIdByYearMonth,
+  getMoneyFlowsByUserIdByYearDate,
+  getMoneyFlowsByUserIdByYearMonthDate,
   updateMoneyFlow,
   deleteMoneyFlow
 }

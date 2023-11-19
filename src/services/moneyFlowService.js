@@ -112,8 +112,8 @@ const updateMoneyFlow = async (id, userId, type, categoryId, memo, amount, year,
   return await moneyFlowDao.updateMoneyFlow(id, userId, typeId, categoryId, memo, amount, year, month, date);
 }
 
-const deleteMoneyFlow = async (id) => {
-  return await moneyFlowDao.deleteMoneyFlow(id);
+const deleteMoneyFlow = async (id, userId) => {
+  return await moneyFlowDao.deleteMoneyFlow(id, userId);
 }
 
 module.exports = {

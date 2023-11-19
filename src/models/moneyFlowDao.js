@@ -97,16 +97,17 @@ const updateMoneyFlow = async (id, userId, typeId, categoryId, memo, amount, yea
   )
 }
 
-const deleteMoneyFlow = async (id) => {
+const deleteMoneyFlow = async (id, userId) => {
   const result = await appDataSource.query(
     `
     DELETE FROM money_flows 
     WHERE id = ?
+    AND user_id = ?
     `,
-    [id]
+    [id, userId]
   )
   if (result.affectedRows === 0) {
-    error.throwErr(409, 'NOT_EXISTING_OR_ALREADY_DELETED');
+    error.throwErr(409, 'NOT_AUTHORIZED_TO_DELETE_OR_ALREADY_DELETED');
   }
   return result;
 }
