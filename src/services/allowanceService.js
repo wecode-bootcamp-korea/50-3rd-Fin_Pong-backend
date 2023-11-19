@@ -1,4 +1,5 @@
 const allowanceDao = require('../models/allowanceDao');
+const moneyFlowDao = require('../models/moneyFlowDao');
 
 const postAllowance = async (userId, allowance, year, month) => {
   return await allowanceDao.postAllowance(userId, allowance, year, month);
@@ -43,6 +44,12 @@ const getAllowanceByUserIdByYearMonth = async (userId, year, month) => { // 단�
   return await allowanceDao.getAllowanceByYearMonth(userId, year, month);
 }
 
+const getAllowanceByUserIdByYearMonthAndGetAmount = async (userId, year, month) => {
+  const allowance = await allowanceDao.getAllowanceByYearMonth(userId, year, month);
+  return await allowance.reduce((acc, allowance) => acc + allowance.amount, 0);
+}
+
+
 const updateAllowance = async (userId, allowance, year, month) => { // userName, year, month(수정 전)가 수정 전의 지표인 함수
   return await allowanceDao.updateAllowance(userId, allowance, year, month);
 }
@@ -67,6 +74,7 @@ module.exports = {
   getAllowancesByUserId,
   getAllowancesByUserIdByYear,
   getAllowanceByUserIdByYearMonth,
+  getAllowanceByUserIdByYearMonthAndGetAmount,
   updateAllowance,
   updateAllowanceById,
   deleteAllowance,

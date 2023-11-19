@@ -44,7 +44,7 @@ const getAllowanceByYear = async (userId, year) => { // 최신 순
   )
 }
 
-const getAllowanceByYearMonth = async (userId, year, month) => { // 최신 순
+const getAllowanceByYearMonth = async (userId, year, month) => {
   return await appDataSource.query(
     `
     SELECT allowances.id, users.name as userName, allowances.amount, allowances.year, allowances.month 
