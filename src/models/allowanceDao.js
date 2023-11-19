@@ -23,9 +23,39 @@ const getAllowance = async (userId) => { // 최신 순
     JOIN users 
     ON allowances.user_id = users.id
     WHERE user_id = ?
-    ORDER BY year DESC, month DESC
+    ORDER BY allowances.year DESC, allowances.month DESC
     `,
     [userId]
+  )
+}
+
+const getAllowanceByYear = async (userId, year) => { // 최신 순
+  return await appDataSource.query(
+    `
+    SELECT allowances.id, users.name as userName, allowances.amount, allowances.year, allowances.month 
+    FROM allowances 
+    JOIN users 
+    ON allowances.user_id = users.id
+    WHERE user_id = ? 
+    AND allowances.year = ?
+    ORDER BY allowances.month DESC
+    `,
+    [userId, year]
+  )
+}
+
+const getAllowanceByYearMonth = async (userId, year, month) => { // 최신 순
+  return await appDataSource.query(
+    `
+    SELECT allowances.id, users.name as userName, allowances.amount, allowances.year, allowances.month 
+    FROM allowances 
+    JOIN users 
+    ON allowances.user_id = users.id
+    WHERE user_id = ? 
+    AND allowances.year = ?
+    AND allowances.month = ?
+    `,
+    [userId, year, month]
   )
 }
 
@@ -55,19 +85,6 @@ const updateAllowanceById = async (allowanceId, amount, year, month) => {
     error.throwErr(409, 'ALREADY_EXISTS');
   }
   return result;
-}
-
-const getAllowanceByYearMonth = async (userId, year, month) => {
-  return await appDataSource.query(
-    `
-    SELECT id, user_id, amount, year, month 
-    FROM allowances 
-    WHERE user_id = ? 
-    AND year = ? 
-    AND month = ?
-    `,
-    [userId, year, month]
-  )
 }
 
 const deleteAllowance = async (userId, year, month) => {
@@ -103,9 +120,10 @@ const deleteAllowanceById = async (allowanceId) => {
 module.exports = {
   postAllowance,
   getAllowance,
+  getAllowanceByYear,
+  getAllowanceByYearMonth,
   updateAllowance,
   updateAllowanceById,
-  getAllowanceByYearMonth,
   deleteAllowance,
   deleteAllowanceById
 }
