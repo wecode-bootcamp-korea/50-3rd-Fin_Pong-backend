@@ -42,7 +42,7 @@ const getNameById = async (userId) => {
     `
     SELECT name
     FROM users 
-    WHERE user_id = ?
+    WHERE id = ?
     `,
     [userId]
   )

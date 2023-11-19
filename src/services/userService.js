@@ -1,8 +1,8 @@
-const userDao = require('../models/categoryDao');
+const userDao = require('../models/userDao');
 
 const getNameById = async (userId) => {
-  const result = await userDao.getIdByCategoryName(userId);
-  return result[0];
+  const result = await userDao.getNameById(userId);
+  return result[0].name;
 }
 
 module.exports = {
