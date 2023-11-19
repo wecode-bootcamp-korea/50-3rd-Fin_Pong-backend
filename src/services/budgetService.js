@@ -17,7 +17,6 @@ const getBudgetByYear = async (familyId, year) => {
   return await budgetDao.getBudgetByYear(familyId, year);
 }
 
-
 const getBudgetByYearMonth = async (familyId, year, month) => {
   return await budgetDao.getBudgetByYearMonth(familyId, year, month);
 }

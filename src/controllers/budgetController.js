@@ -37,7 +37,6 @@ const getBudgetByCondition = async (req, res) => {
       return res.status(200).json({message: 'GET_SUCCESS', 'budget': budget});
     }
     else if (year && !month) { // 연도 조건만 있고, 월 조건은 없는 경우 => 해당 연도의 모든 예산을 보여 줍니다.
-      console.log(year)
       const budget = await budgetService.getBudgetByYear(familyId, year);
       return res.status(200).json({message: 'GET_SUCCESS', 'budget': budget});
     }
