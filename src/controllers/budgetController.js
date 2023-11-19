@@ -19,7 +19,7 @@ const postBudget = async (req, res) => { // 관리자만 가능
   }
 }
 
-const getBudget = async (req, res) => {
+const getBudgetByCondition = async (req, res) => {
   try {
     const { familyId, roleId } = req.userData;
     if (!familyId) {
@@ -28,7 +28,20 @@ const getBudget = async (req, res) => {
     else if (roleId !== 0 && roleId !== 1) {
       error.throwErr(400, 'BAD_USER');
     }
-    const budget = await budgetService.getBudget(familyId);
+    const { year, month } = req.query;
+    if (!year && month) { // 달만 있고 연도가 없는 경우  => 연도를 입력해 주세요
+      error.throwErr(400, 'KEY_ERROR_CHOOSE_YEAR');
+    }
+    else if (!year && !month) { // 연도, 월의 조건이 없는 경우 => 해당 가족의 예산을 모두 보여 줍니다.
+      const budget = await budgetService.getBudget(familyId);
+      return res.status(200).json({message: 'GET_SUCCESS', 'budget': budget});
+    }
+    else if (year && !month) { // 연도 조건만 있고, 월 조건은 없는 경우 => 해당 연도의 모든 예산을 보여 줍니다.
+      console.log(year)
+      const budget = await budgetService.getBudgetByYear(familyId, year);
+      return res.status(200).json({message: 'GET_SUCCESS', 'budget': budget});
+    }
+    const budget = await budgetService.getBudgetByYearMonth(familyId, year, month); // 연도, 월 조건 모두 있는 경우 => 해당 연, 월의 예산을 보여 줍니다.
     return res.status(200).json({message: 'GET_SUCCESS', 'budget': budget});
   } catch (err) {
     console.error(err);
@@ -59,6 +72,6 @@ const updateBudget = async (req, res) => { // 관리자만 가능합니다.
 
 module.exports = {
   postBudget,
-  getBudget,
+  getBudgetByCondition,
   updateBudget
 }

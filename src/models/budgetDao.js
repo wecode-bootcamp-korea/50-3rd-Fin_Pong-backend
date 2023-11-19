@@ -31,13 +31,40 @@ const getBudget = async (familyId) => {
   )
 }
 
+const getBudgetByYear = async (familyId, year) => {
+  return await appDataSource.query(
+    `
+    SELECT id, budget, year, month
+    FROM budget 
+    WHERE family_id = ?
+    AND year = ?
+    ORDER BY month DESC
+    `,
+    [familyId, year]
+  )
+}
+
+const getBudgetByYearMonth = async (familyId, year, month) => {
+  return await appDataSource.query(
+    `
+    SELECT id, budget, year, month
+    FROM budget 
+    WHERE family_id = ?
+    AND year = ?
+    AND month = ?
+    `,
+    [familyId, year, month]
+  )
+}
+
 const updateBudget = async (familyId, budget, year, month) => {
   return await  appDataSource.query(
     `
     UPDATE budget 
     SET budget = ?
     WHERE family_id = ?
-    AND year = ? AND month = ?
+    AND year = ?
+    AND month = ?
     `,
     [budget, familyId, year, month]
   )
@@ -46,6 +73,8 @@ const updateBudget = async (familyId, budget, year, month) => {
 module.exports = {
   postBudget,
   getBudget,
+  getBudgetByYear,
+  getBudgetByYearMonth,
   updateBudget
 }
 
