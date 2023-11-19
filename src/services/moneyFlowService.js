@@ -66,11 +66,6 @@ const getMoneyFlowsByUserIdByYearMonth = async (userId, year, month) => {
   )))
 }
 
-const getMoneyFlowsByYearMonthAndGetSum = async (userId, year, month) => {
-  const flows = await moneyFlowDao.getMoneyFlowsByUserIdByYearMonth(userId, year, month);
-  return await Promise.all(flows.reduce((acc, flow) => acc + flow.amount, 0));
-}
-
 const getMoneyFlowsByUserIdByYearDate = async (userId, year, date) => {
   const flows = await moneyFlowDao.getMoneyFlowsByUserIdByYearDate(userId, year, date);
   return await Promise.all(flows.map( async (flow) => ({
@@ -128,7 +123,6 @@ module.exports = {
   getMoneyFlowsByUserIdByYearMonth,
   getMoneyFlowsByUserIdByYearDate,
   getMoneyFlowsByUserIdByYearMonthDate,
-  getMoneyFlowsByYearMonthAndGetSum,
   updateMoneyFlow,
   deleteMoneyFlow
 }
