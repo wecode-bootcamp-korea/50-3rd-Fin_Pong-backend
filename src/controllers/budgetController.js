@@ -63,11 +63,8 @@ const getRestBudget = async (req, res) => {
     }
     const familyUsersIds = await usersFamilyService.getFamilyUsersIds(familyId);
     const budget = await budgetService.getBudgetByYearMonthAndGetAmount(familyId, year, month); // 연도, 월 조건 모두 있는 경우 => 해당 연, 월의 예산을 보여 줍니다.
-    console.log(budget, 'Budget')
     const sumOfAllowances = await allowanceService.getAllowanceByFamilyUserIdsByYearMonthAndGetAmount(familyUsersIds, year, month); // 가족 구성원의 해당 연, 월의 용돈의 합산 금액을 찾습니다.
-    console.log(sumOfAllowances, 'ALLOWANCES')
     const sumOfFixedMoneyFlows = await fixedMoneyFlowService.getUsedFixedMoneyFlowsByYearMonthAndGetAmount(userId, year, month);
-    console.log(sumOfFixedMoneyFlows)
     const restBudget = budget - sumOfAllowances - sumOfFixedMoneyFlows
     return res.status(200).json({message: 'GET_SUCCESS', 'restBudget': restBudget});
   } catch(err) {
