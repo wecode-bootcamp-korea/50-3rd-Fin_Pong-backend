@@ -20,7 +20,6 @@ getMoneyFlowsByCondition = async (req, res) => {
   try {
     const { familyId } = req.userData;
     const { userName, year, month, date } = req.query;
-    console.log(req.query)
     if (!year && (month || date)) { // 연도가 없고 월, 날짜 조건이 있는 경우  => 연도를 입력해 주세요
       error.throwErr(400, 'KEY_ERROR_SELECT_A_YEAR');
     }
