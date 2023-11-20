@@ -4,8 +4,8 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon app.js"
+    "test": "DOTENV_CONFIG_PATH=.env.test jest --setupFiles=dotenv/config",
+    "start": "nodemon server.js"
   },
   "keywords": [],
   "author": "",
@@ -23,5 +23,9 @@
     "nodemon": "^3.0.1",
     "npm": "^10.2.3",
     "typeorm": "^0.3.17"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "supertest": "^6.3.3"
   }
 }

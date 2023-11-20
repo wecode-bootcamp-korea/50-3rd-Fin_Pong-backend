@@ -11,12 +11,30 @@ const appDataSource = new DataSource({
     database: process.env.TYPEORM_DATABASE
 })
 
-appDataSource.initialize()
-    .then(() => {
-        console.log('Data Source has been initialized!')
-    })
-    .catch((err) => {
-        console.error('Error occured during Data Source initialization', err)
-    })
+const testDataSource = new DataSource({
+    type : process.env.DB_TYPE,
+    host: process.env.DB_HOST,
+    port: process.env.DB_PORT,
+    username: process.env.DB_USERNAME,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME
+})
 
-module.exports = { appDataSource }
+// appDataSource.initialize()
+//     .then(() => {
+//         console.log('Data Source has been initialized!')
+//     })
+//     .catch((err) => {
+//         console.error('Error occured during Data Source initialization', err)
+//     })
+
+async function initializeDataSource() {
+    try {
+        await appDataSource.initialize();
+        console.log('Data Source has been initialized!');
+    } catch (err) {
+        console.error('Error occurred during Data Source initialization', err);
+    }
+}
+
+module.exports = { appDataSource,initializeDataSource,testDataSource }

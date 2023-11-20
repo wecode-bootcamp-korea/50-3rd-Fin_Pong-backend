@@ -11,7 +11,6 @@ const newBook = async(userData) => {
 
 const joinBook = async(userData, authCode) => {
   const findFamilyId = await familyDao.findFamilyId(authCode)
-
   return result = await familyDao.addFamilyBook(userData.userId, findFamilyId[0].familyId)
 }
 
