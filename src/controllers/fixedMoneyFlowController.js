@@ -83,7 +83,6 @@ const deleteFixedMoneyFlows = async (req, res) => {
     }
     const groupId = await fixedMoneyFlowService.getGroupIdByFlowId(id);
     const fixedFlowIds = await fixedMoneyFlowService.getFlowIdsByGroupId(groupId);
-    console.log(fixedFlowIds)
     await fixedMoneyFlowService.deleteFixedMoneyFlows(fixedFlowIds, groupId, year, month, date);
     return res.status(200).json({message: 'DELETE_SUCCESS'});
   } catch (err) {
