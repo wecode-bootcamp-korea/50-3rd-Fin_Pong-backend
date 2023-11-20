@@ -42,7 +42,6 @@ const view = async(req, res) => {
       rule  : rule,
       unit  : unit
     } = req.query
-
     if (rule === 'year' && unit === 'family'){
       const userId = undefined
       const result = await flowServices.yearlyView( userId, familyId, year )
