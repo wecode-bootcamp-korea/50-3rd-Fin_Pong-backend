@@ -1,7 +1,7 @@
 const { appDataSource } = require('../utils/dataSource');
 const error = require('../utils/error');
 
-const getFixedMoneyFlowsByYearMonth = async (userId, typeId, year, month) => { // 월별
+const getUsedOrGotFixedMoneyFlowsByYearMonth = async (userId, typeId, year, month) => { // 월별
   return await appDataSource.query(
     `
     SELECT id, user_id, flow_type_id, category_id, memo, amount, year, month, date 
@@ -17,5 +17,5 @@ const getFixedMoneyFlowsByYearMonth = async (userId, typeId, year, month) => { /
 }
 
 module.exports = {
-  getFixedMoneyFlowsByYearMonth
+  getUsedOrGotFixedMoneyFlowsByYearMonth
 }
