@@ -21,6 +21,15 @@ const getBudgetByYearMonth = async (familyId, year, month) => {
   return await budgetDao.getBudgetByYearMonth(familyId, year, month);
 }
 
+const getBudgetByYearMonthAndGetAmount = async (familyId, year, month) => {
+  const budget =  await budgetDao.getBudgetByYearMonth(familyId, year, month);
+  if (!budget.length) {
+    return 0;
+  }
+  const amount = budget[0].budget;
+  return await amount;
+}
+
 const updateBudget = async (familyId, budget, year, month) => {
   return await budgetDao.updateBudget(familyId, budget, year, month);
 }
@@ -30,5 +39,6 @@ module.exports = {
   getBudget,
   getBudgetByYear,
   getBudgetByYearMonth,
+  getBudgetByYearMonthAndGetAmount,
   updateBudget
 }

@@ -1,11 +1,14 @@
 const budgetService = require('../services/budgetService');
+const allowanceService = require('../services/allowanceService');
+const usersFamilyService = require('../services/usersFamilyService');
+const fixedMoneyFlowService = require('../services/fixedMoneyFlowService')
 const error = require('../utils/error');
 
 const postBudget = async (req, res) => { // 관리자만 가능
   try {
     const { familyId, roleId } = req.userData;
     if (!familyId || !roleId) { // roleId가 0이면 일반, 1이면 관리자이므로 일반 가입자면 에러를 냅니다.
-      error.throwErr('400', 'NOT_INCLUDED_IN_FAMILY_OR_NOT_AN_ADMIN');
+      error.throwErr('400', 'NOT_AN_ADMIN');
     }
     const { budget, year, month } = req.body;
     if (!budget || !year || !month) {
@@ -25,8 +28,8 @@ const getBudgetByCondition = async (req, res) => {
     if (!familyId) {
       error.throwErr(400, 'NOT_INCLUDED_IN_FAMILY');
     }
-    else if (roleId !== 0 && roleId !== 1) {
-      error.throwErr(400, 'BAD_USER');
+    else if (!roleId) { // roleId가 0이면 일반, 1이면 관리자이므로 일반 가입자면 에러를 냅니다.
+      error.throwErr('400', 'NOT_AN_ADMIN');
     }
     const { year, month } = req.query;
     if (!year && month) { // 달만 있고 연도가 없는 경우  => 연도를 입력해 주세요
@@ -48,14 +51,36 @@ const getBudgetByCondition = async (req, res) => {
   }
 }
 
+const getRestBudget = async (req, res) => {
+  try {
+    const { userId, familyId } = req.userData;
+    if (!familyId) {
+      error.throwErr(400, 'NOT_INCLUDED_IN_FAMILY');
+    }
+    const { year, month } = req.query;
+    if (!year || !month) {
+      error.throwErr(400, 'KEY_ERROR');
+    }
+    const familyUsersIds = await usersFamilyService.getFamilyUsersIds(familyId);
+    const budget = await budgetService.getBudgetByYearMonthAndGetAmount(familyId, year, month); // 연도, 월 조건 모두 있는 경우 => 해당 연, 월의 예산을 보여 줍니다.
+    console.log(budget, 'Budget')
+    const sumOfAllowances = await allowanceService.getAllowanceByFamilyUserIdsByYearMonthAndGetAmount(familyUsersIds, year, month); // 가족 구성원의 해당 연, 월의 용돈의 합산 금액을 찾습니다.
+    console.log(sumOfAllowances, 'ALLOWANCES')
+    const sumOfFixedMoneyFlows = await fixedMoneyFlowService.getUsedFixedMoneyFlowsByYearMonthAndGetAmount(userId, year, month);
+    console.log(sumOfFixedMoneyFlows)
+    const restBudget = budget - sumOfAllowances - sumOfFixedMoneyFlows
+    return res.status(200).json({message: 'GET_SUCCESS', 'restBudget': restBudget});
+  } catch(err) {
+    console.error(err);
+    return res.status(err.statusCode || 500).json({message: err.message || 'INTERNAL_SERVER_ERROR'});
+  }
+}
+
 const updateBudget = async (req, res) => { // 관리자만 가능합니다.
   try {
-    const { userId, familyId, roleId } = req.userData;
+    const { familyId, roleId } = req.userData;
     if (!familyId || !roleId) {
       error.throwErr('400', 'NOT_INCLUDED_IN_FAMILY_OR_NOT_AN_ADMIN');
-    }
-    else if (!userId) {
-      error.throwErr('400', 'TOKEN_KEY_ERROR');
     }
     const { budget, year, month } = req.body;
     if (!budget || !year || !month) {
@@ -72,5 +97,6 @@ const updateBudget = async (req, res) => { // 관리자만 가능합니다.
 module.exports = {
   postBudget,
   getBudgetByCondition,
+  getRestBudget,
   updateBudget
 }
