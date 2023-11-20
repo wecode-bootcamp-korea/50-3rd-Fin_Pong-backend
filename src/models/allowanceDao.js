@@ -15,6 +15,7 @@ const getAllowanceByYearMonth = async (userId, year, month) => {
     [userId, year, month]
   )
 }
+
 module.exports = {
   getAllowanceByYearMonth
 }
