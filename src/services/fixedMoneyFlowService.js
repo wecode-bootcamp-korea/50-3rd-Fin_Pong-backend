@@ -27,15 +27,17 @@ const postFixedMoneyFlows = async (userId, type, categoryId, memo, amount, start
               result.push(await fixedMoneyFlowDao.postFixedMoneyFlow(userId, typeId, categoryId, memo, amount, k, l, integerStartDate, transaction));
             }
           }
-          for (let n = 1; n <= integerEndMonth; n++) {
-            result.push(await fixedMoneyFlowDao.postFixedMoneyFlow(userId, typeId, categoryId, memo, amount, k, n, integerStartDate, transaction));
+          else if (k === integerEndYear) {
+            for (let n = 1; n <= integerEndMonth; n++) {
+              result.push(await fixedMoneyFlowDao.postFixedMoneyFlow(userId, typeId, categoryId, memo, amount, k, n, integerStartDate, transaction));
+            }
           }
         }
-      } else if (integerEndYear === integerStartYear) {
-        if (endMonth > integerStartMonth) {
-          for (let m = integerStartMonth; m <= integerEndMonth; m++) {
-            result.push(await fixedMoneyFlowDao.postFixedMoneyFlow(userId, typeId, categoryId, memo, amount, integerStartYear, m, integerStartDate, transaction));
-          }
+        } else if (integerEndYear === integerStartYear) {
+          if (endMonth > integerStartMonth) {
+            for (let m = integerStartMonth; m <= integerEndMonth; m++) {
+              result.push(await fixedMoneyFlowDao.postFixedMoneyFlow(userId, typeId, categoryId, memo, amount, integerStartYear, m, integerStartDate, transaction));
+            }
         } else {
           error.throwErr(400, '마감월은 시작월보다 뒤여야 합니다');
         }
