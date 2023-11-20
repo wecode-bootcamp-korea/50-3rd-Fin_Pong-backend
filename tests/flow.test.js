@@ -1,21 +1,18 @@
 const request = require('supertest');
 const { createApp } = require('../app');
 const { appDataSource } = require('../src/utils/dataSource');
-const supplies = require('./testSupplies.js')
+const supplies = require('./testSupplies.js');
 
 describe('get ping', () => {
   let app;
 
   beforeAll(async() => {
     app = createApp();
-    await appDataSource.initialize();
-    for (let i=0; i<supplies.startQuery.length; i++){
-      await appDataSource.query(supplies.startQuery[i])
-    }
+
   });
 
   afterEach(async() => {
-    
+
   });
 
   test('SUCCESS : get pong', async () => {
@@ -34,7 +31,10 @@ describe('get MonthlyViewByFamily', () => {
 
   beforeAll(async() => {
     app = createApp()
-    
+    await appDataSource.initialize();
+    for (let i=0; i<supplies.startQuery.length; i++){
+      await appDataSource.query(supplies.startQuery[i])
+    }
   });
   afterEach(async() => {
     for (let i=0; i<supplies.truncate.length; i++){
@@ -83,5 +83,155 @@ describe('get MonthlyViewByFamily', () => {
           }
       })
   })
+});
 
+describe('get MonthlyViewByPrivate', () => {
+  let app;
+
+  beforeAll(async() => {
+    app = createApp()
+    await appDataSource.initialize();
+    for (let i=0; i<supplies.startQuery.length; i++){
+      await appDataSource.query(supplies.startQuery[i])
+    }
+  });
+  afterEach(async() => {
+    for (let i=0; i<supplies.truncate.length; i++){
+      await appDataSource.query(supplies.truncate[i])
+    }
+
+    await appDataSource.destroy();
+  });
+
+  test('SUCCESS :  get MonthlyViewByPrivate', async() => {
+    const res = await request(app)
+      .get('/flow/view?rule=year&year=2023&unit=private')
+      .set('Authorization', `Bearer ${supplies.token}`)
+      .send()
+
+      expect(res.status).toBe(200)
+      expect(res.body)
+        .toEqual({
+          "INCOME": {
+              "1월": 500000,
+              "2월": 600000,
+              "3월": 600000,
+              "4월": 600000,
+              "5월": 600000,
+              "6월": 600000,
+              "7월": 600000,
+              "8월": 600000,
+              "9월": 600000,
+              "10월": 600000,
+              "11월": 600000,
+              "12월": 600000
+          },
+          "SPENDING": {
+              "1월": 524500,
+              "2월": 524500,
+              "3월": 524500,
+              "4월": 524500,
+              "5월": 524500,
+              "6월": 524500,
+              "7월": 524500,
+              "8월": 524500,
+              "9월": 524500,
+              "10월": 524500,
+              "11월": 524500,
+              "12월": 518500
+          }
+      })
+  })
+});
+
+describe('get CategoryViewByFamily', () => {
+  let app;
+
+  beforeAll(async() => {
+    app = createApp()
+    await appDataSource.initialize();
+    for (let i=0; i<supplies.startQuery.length; i++){
+      await appDataSource.query(supplies.startQuery[i])
+    }
+  });
+  afterEach(async() => {
+    for (let i=0; i<supplies.truncate.length; i++){
+      await appDataSource.query(supplies.truncate[i])
+    }
+
+    await appDataSource.destroy();
+  });
+
+  test('SUCCESS :  CategoryViewByFamily', async() => {
+    const res = await request(app)
+      .get('/flow/view?rule=category&year=2023&month=11&unit=family')
+      .set('Authorization', `Bearer ${supplies.token}`)
+      .send()
+
+      expect(res.status).toBe(200)
+      expect(res.body)
+        .toEqual([
+          {
+              "id": 1,
+              "category": "생활비",
+              "spending": "99%"
+          },
+          {
+              "id": 2,
+              "category": "공과금",
+              "spending": "0%"
+          },
+          {
+              "id": 3,
+              "category": "기타",
+              "spending": "1%"
+          }
+      ])
+  })
+});
+
+describe('get CategoryViewByPrivate', () => {
+  let app;
+
+  beforeAll(async() => {
+    app = createApp()
+    await appDataSource.initialize();
+    for (let i=0; i<supplies.startQuery.length; i++){
+      await appDataSource.query(supplies.startQuery[i])
+    }
+  });
+  afterEach(async() => {
+    for (let i=0; i<supplies.truncate.length; i++){
+      await appDataSource.query(supplies.truncate[i])
+    }
+
+    await appDataSource.destroy();
+  });
+
+  test('SUCCESS :  CategoryViewByPrivate', async() => {
+    const res = await request(app)
+      .get('/flow/view?rule=category&year=2023&month=11&unit=private')
+      .set('Authorization', `Bearer ${supplies.token}`)
+      .send()
+
+      expect(res.status).toBe(200)
+      expect(res.body)
+        .toEqual([
+          {
+              "id": 1,
+              "category": "생활비",
+              "spending": "99%"
+          },
+          {
+              "id": 2,
+              "category": "공과금",
+              "spending": "0%"
+          },
+          {
+              "id": 3,
+              "category": "기타",
+              "spending": "1%"
+          }
+      ])
+  })
 });
