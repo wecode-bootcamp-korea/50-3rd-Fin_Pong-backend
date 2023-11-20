@@ -11,18 +11,6 @@ const getFlowStatusById = async (flowTypeId) => {
   )
 }
 
-const getIdByFlowStatus = async (type) => {
-  return await appDataSource.query(
-    `
-    SELECT id
-    FROM flow_type
-    WHERE status = ?
-    `,
-    [type]
-  )
-}
-
 module.exports = {
-  getFlowStatusById,
-  getIdByFlowStatus
+  getFlowStatusById
 }

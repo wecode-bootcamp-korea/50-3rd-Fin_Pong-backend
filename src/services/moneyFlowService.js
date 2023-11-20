@@ -5,9 +5,15 @@ const categoryService = require('../services/categoryService');
 const error = require('../utils/error');
 
 const postMoneyFlow = async (userId, type, categoryId, memo, amount, year, month, date) => {
-  const typeId = await flowTypeService.getFlowStatusById(type);
-  if (!typeId) {
-    error.throwErr(404, 'NOT_EXISTING_TYPE');
+  let typeId = 1;
+  switch (type) {
+    case '수입':
+      break;
+    case '지출':
+      typeId += 1;
+      break;
+    default:
+      error.throwErr('NOT_FOUND_TYPE')
   }
   return await moneyFlowDao.postMoneyFlow(userId, typeId, categoryId, memo, amount, year, month, date);
 }
@@ -93,9 +99,15 @@ const getMoneyFlowsByUserIdByYearMonthDate = async (userId, year, month, date) =
 }
 
 const updateMoneyFlow = async (id, userId, type, categoryId, memo, amount, year, month, date) => {
-  const typeId = await flowTypeService.getFlowStatusById(type);
-  if (!typeId) {
-    error.throwErr(404, 'NOT_EXISTING_TYPE');
+  let typeId = 1;
+  switch (type) {
+    case '수입':
+      break;
+    case '지출':
+      typeId += 1;
+      break;
+    default:
+      error.throwErr('NOT_FOUND_TYPE')
   }
   return await moneyFlowDao.updateMoneyFlow(id, userId, typeId, categoryId, memo, amount, year, month, date);
 }
