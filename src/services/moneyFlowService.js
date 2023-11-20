@@ -46,7 +46,6 @@ const getMoneyFlowsByFamilyUserId = async (familyUserIds) => {
       };
     })));
   }
-  console.log(familyUserFlows)
   return familyUserFlows;
 }
 
