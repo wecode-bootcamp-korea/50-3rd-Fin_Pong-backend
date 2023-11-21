@@ -58,7 +58,6 @@ const getAllowancesByCondition = async (req, res) => { // 일반 유저도 가�
       const allowances = await allowanceService.getAllowanceByUserIdByYearMonth(familyUsersIds, year, month); // 가족 구성원의 해당 연, 월의 용돈을 찾습니다.
       return res.status(200).json({message: 'GET_SUCCESS', allowances: allowances});
     }
-
   } catch(err) {
     console.error(err);
     return res.status(err.statusCode || 500).json({message: err.message || 'INTERNAL_SERVER_ERROR'});
