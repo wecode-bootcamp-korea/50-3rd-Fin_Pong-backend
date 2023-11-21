@@ -81,7 +81,7 @@ const getFixedMoneyFlows = async (userId) => {
   return mapped;
 }
 
-const getFixedMoneyFlowsByYearMonth = async (userId, year, month) => { // 월 별
+const getFixedMoneyFlowsByYearMonth = async (userId, year, month) => { // 연, 월 별
   const flows = await fixedMoneyFlowDao.getFixedMoneyFlowsByYearMonth(userId, year, month);
   const mapped = await Promise.all(flows.map( async (flow) => ({
     id: flow.id,
@@ -98,7 +98,7 @@ const getFixedMoneyFlowsByYearMonth = async (userId, year, month) => { // 월 �
   return mapped;
 }
 
-const getFixedMoneyFlowsByYearDate = async (userId, year, date) => { // 월 별
+const getFixedMoneyFlowsByYearDate = async (userId, year, date) => { // 해당 연의 날짜 별 (매달 며칠에)
   const flows = await fixedMoneyFlowDao.getFixedMoneyFlowsByYearDate(userId, year, date);
   const mapped = await Promise.all(flows.map( async (flow) => ({
     id: flow.id,
@@ -115,7 +115,7 @@ const getFixedMoneyFlowsByYearDate = async (userId, year, date) => { // 월 별
   return mapped;
 }
 
-const getFixedMoneyFlowsByYearMonthDate = async (userId, year, month, date) => { // 월 별
+const getFixedMoneyFlowsByYearMonthDate = async (userId, year, month, date) => { // 연, 월, 일 별
   const flows = await fixedMoneyFlowDao.getFixedMoneyFlowsByYearMonthDate(userId, year, month, date);
   const mapped = await Promise.all(flows.map( async (flow) => ({
     id: flow.id,
@@ -132,17 +132,17 @@ const getFixedMoneyFlowsByYearMonthDate = async (userId, year, month, date) => {
   return mapped;
 }
 
-const getGroupIdByFlowId = async (fixedFlowId) => {
+const getGroupIdByFlowId = async (fixedFlowId) => { // 고정 수입/지출 내역이 속한 group 의 id를 찾습니다.
   const groupId = await fixedMoneyFlowDao.getGroupIdsByFlowId(fixedFlowId);
-  if (!groupId.legnth) {
-    error.throwErr(404, 'NOT_EXISTING')
+  if (!await groupId.length) {
+    error.throwErr(404, 'NOT_EXISTING');
   }
   return await groupId[0]['groupId'];
 }
 
-const getFlowIdsByGroupId = async (groupId) => {
+const getFlowIdsByGroupId = async (groupId) => { // group 내에 속해 있는 모든 고정 수입/지출 내역의 id를 찾습니다.
   const fixedFlowIdsObj = await fixedMoneyFlowDao.getFlowIdsByGroupId(groupId);
-  return await Promise.all(fixedFlowIdsObj.map( async fixedFlowObj => await fixedFlowObj.flowId));
+  return Promise.all(fixedFlowIdsObj.map(fixedFlowObj => fixedFlowObj.flowId));
 }
 
 const updateFixedMoneyFlows = async (flowIds, amount, type, category, memo) => {
@@ -160,22 +160,33 @@ const updateFixedMoneyFlows = async (flowIds, amount, type, category, memo) => {
   }
 }
 
-const deleteFixedMoneyFlows = async (flowIds, groupId, year, month, date) => {
+const deleteFixedMoneyFlows = async (flowIds, groupId, year, month, date) => { // 고정 수입/지출 내역 삭제 대상을 찾고, 같은 조건으로 연관 데이터들의 삭제를 조건에 따라 진행합니다.
   try {
     await appDataSource.transaction(async (transaction) => {
-      let deletedIds = []
-      for (let index in flowIds) {
-        const deleteTargetId = await fixedMoneyFlowDao.selectDeletedFixedMoneyFlowsByDate(flowIds[index], year, month, date, transaction);
-        deletedIds.push(await deleteTargetId);
-      }
+
+      const deletedIds = await Promise.all(flowIds.map(async (flowId) => { // 삭제 대상 고정 수입/지출 내역 ids 의 배열을 찾습니다.
+        const flowIdObj = await fixedMoneyFlowDao.selectDeletedFixedMoneyFlowsByDate(flowId, year, month, date, transaction);
+        return flowIdObj.id;
+      }));
+
+      const sortedEveryFlowIdsOfGroup = flowIds.slice().sort(); // 그룹 내 전체 fixedFlowId를 정렬합니다.
+      const sortedDeletedIdsOfGroup = deletedIds.slice().sort(); // 그룹 내 삭제 대상 fixedFlowId를 정렬합니다.
+
+      const areArraysEqual = JSON.stringify(sortedEveryFlowIdsOfGroup) === JSON.stringify(sortedDeletedIdsOfGroup); // 두 배열을 비교합니다(n log n). 이 때, 삭제 대상이 그룹 내 전체 고정 수입/지출 내역이면 해당 group 의 data 도 삭제합니다. (조건 1)
+
       await transaction.query('SET foreign_key_checks = 0');
-      for (let i in flowIds) {
-        await fixedMoneyFlowDao.deleteFixedMoneyFlowsByDate(flowIds[i], year, month, date, transaction);
+      await Promise.all(flowIds.map(async (flowId) => { // 삭제 대상 고정 수입/지출 내역을 삭제합니다.
+        await fixedMoneyFlowDao.deleteFixedMoneyFlowsByDate(flowId, year, month, date, transaction);
+      }));
+
+      await Promise.all(deletedIds.map(async (ids) => { // 삭제 대상 고정 수입/지출 내역과, 해당 그룹의 중간 테이블의 데이터를 삭제합니다.
+        await fixedMoneyFlowDao.deleteMiddleFixedFlowsByIds(ids, groupId, transaction);
+      }));
+
+      if (areArraysEqual) {
+        await fixedMoneyFlowDao.deleteFixedMoneyFlowsGroupById(groupId, transaction); // 삭제 대상이 그룹 내 전체 fixedFlows 면, group 의 data 도 삭제합니다.
       }
-      const deletedId = await Promise.all(deletedIds.map( async flowIdObj => await flowIdObj.id));
-      for (let ids in deletedId) {
-        await fixedMoneyFlowDao.deleteMiddleFixedFlowsByIds(deletedId[ids], groupId, transaction);
-      }
+
       await transaction.query('SET foreign_key_checks = 1');
       return 'DELETE_SUCCESS';
     })

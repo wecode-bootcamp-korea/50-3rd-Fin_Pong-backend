@@ -10,7 +10,7 @@ const postFixedFlows = async (req, res) => { // 관리자만 가능
     }
     const { type, category, memo, amount, startYear, startMonth, startDate, endYear, endMonth } = req.body;
     if ( !type || !category || !memo || !amount || !startYear || !startMonth || !startDate || !endYear || !endMonth) {
-      error.throwErr(400, 'KEY ERROR');
+      error.throwErr(400, 'KEY_ERROR');
     }
     const categoryId = await categoryService.getIdByCategoryName(category);
     await fixedMoneyFlowService.postFixedMoneyFlows(userId, type, categoryId, memo, amount, startYear, startMonth, startDate, endYear, endMonth);
@@ -45,10 +45,10 @@ const getFixedMoneyFlowsByCondition = async (req, res) => {
     }
     const fixedMoneyFlows = await fixedMoneyFlowService.getFixedMoneyFlowsByYearMonthDate(userId, year, month, date); // 해당 유저의 해당 연, 월, 날짜의 수입/지출 내역을 찾습니다.
     return res.status(200).json({message: 'GET_SUCCESS', flows: fixedMoneyFlows});
-    } catch (err) {
-      console.error(err);
-      return res.status(err.statusCode || 500).json({message: err.message || 'INTERNAL_SERVER_ERROR'});
-    }
+  } catch (err) {
+    console.error(err);
+    return res.status(err.statusCode || 500).json({message: err.message || 'INTERNAL_SERVER_ERROR'});
+  }
 }
 
 const updateFixedMoneyFlows = async (req, res) => {
@@ -75,11 +75,11 @@ const deleteFixedMoneyFlows = async (req, res) => {
   try {
     const { familyId, roleId } = req.userData;
     if (!familyId || !roleId) {
-      error.throwErr(400, 'NOT_INCLUDED_IN_FAMILY_OR_NOT_AN_ADMIN');
+      error.throwErr(400, 'NOT_AN_ADMIN');
     }
-    const { id, year, month, date } = req.body;
+    const { id, year, month, date } = req.query;
     if (!id || !year || !month || !date) {
-      error.throwErr(409, 'KEY_ERROR');
+      error.throwErr(400, 'KEY_ERROR');
     }
     const groupId = await fixedMoneyFlowService.getGroupIdByFlowId(id);
     const fixedFlowIds = await fixedMoneyFlowService.getFlowIdsByGroupId(groupId);

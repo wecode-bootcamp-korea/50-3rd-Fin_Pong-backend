@@ -121,17 +121,12 @@ const selectDeletedFixedMoneyFlowsByDate = async (flowId, year, month, date, tra
     WHERE (id = ? AND year = ? AND month > ?)
     OR (id = ? AND year = ? AND month = ? AND date >= ?)
     OR (id = ? AND year > ?)`;
-
-  // Execute the query and retrieve the result
   const result = await transaction.query(query, [flowId, year, month, flowId, year, month, date, flowId, year]);
 
-  // Check if there are any rows in the result
   if (result.length > 0) {
-    // Return the first id from the result (assuming the query returns only one row)
     return result[0];
   } else {
-    // If no rows match the criteria, you may want to handle this case accordingly
-    return await result; // or throw an error, or return a default value, etc.
+    return await result;
   }
 };
 const deleteFixedMoneyFlowsByDate = async (flowId, year, month, date, transaction) => { // array 안에 obj.id = 1, 2, 4, ..
@@ -145,12 +140,19 @@ const deleteFixedMoneyFlowsByDate = async (flowId, year, month, date, transactio
 
 const deleteMiddleFixedFlowsByIds = async (deletedId, groupId, transaction) => {
   const query = `DELETE FROM middle_fixed_money_flows 
-    WHERE id = ?
+    WHERE fixed_money_flow_id = ?
     AND fixed_money_flow_group_id = ?`;
   const result = transaction.query(query, [deletedId, groupId])
   if (result.affectedRows === 0) {
     error.throwErr(409, 'NOT_EXISTING_OR_ALREADY_DELETED');
   }
+  return result;
+}
+
+const deleteFixedMoneyFlowsGroupById = async (groupId, transaction) => { // id로 group 의 data를 삭제합니다.
+  const query = `DELETE FROM fixed_money_flows_group 
+    WHERE id = ?`;
+  const result = await transaction.query(query, [groupId]);
   return result;
 }
 
@@ -167,5 +169,6 @@ module.exports = {
   updateFixedMoneyFlows,
   selectDeletedFixedMoneyFlowsByDate,
   deleteFixedMoneyFlowsByDate,
-  deleteMiddleFixedFlowsByIds
+  deleteMiddleFixedFlowsByIds,
+  deleteFixedMoneyFlowsGroupById
 }
