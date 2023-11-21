@@ -77,9 +77,7 @@ const getRestAllowance = async (req, res) => {
     }
     const userId = await usersFamilyService.getAuthenticUserId(familyId, userName);
     const allowance = await allowanceService.getAllowanceByUserIdByYearMonthAndGetAmount(userId, year, month); // 해당 유저의 해당 연, 월의 용돈을 찾습니다.
-    console.log('>>>>>>>>', allowance)
     const sumOfUsage = await moneyFlowService.getUsedMoneyFlowsByYearMonthAndGetSum(userId, year, month);
-    console.log(sumOfUsage)
     const restAllowance = allowance - sumOfUsage
     return res.status(200).json({message: 'GET_SUCCESS', restAllowance: restAllowance});
   } catch (err) {
