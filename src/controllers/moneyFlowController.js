@@ -7,6 +7,9 @@ const postMoneyFlow = async (req, res) => {
   try {
     const { userId } = req.userData;
     const { type, category, memo, amount, year, month, date } = req.body;
+    if (!type || !category || !memo || !amount || !year || !month || !date) {
+      error.throwErr(400, 'KEY_ERROR');
+    }
     const categoryId = await categoryService.getIdByCategoryName(category);
     await moneyFlowService.postMoneyFlow(userId, type, categoryId, memo, amount, year, month, date);
     return res.status(200).json({message: 'POST_SUCCESS'})
@@ -75,6 +78,9 @@ const updateMoneyFlow = async (req, res) => {
   try {
     const { userId } = req.userData;
     const { id, type, category, memo, amount, year, month, date } = req.body;
+    if (!id || !type || !category || !memo || !amount || !year || !month || !date) {
+      error.throwErr(400, 'KEY_ERROR');
+    }
     const categoryId = await categoryService.getIdByCategoryName(category);
     await moneyFlowService.updateMoneyFlow(id, userId, type, categoryId, memo, amount, year, month, date);
     return res.status(200).json({message: 'PUT_SUCCESS'})
@@ -88,6 +94,9 @@ const deleteMoneyFlow = async (req, res) => {
   try{
     const { userId } = req.userData;
     const { id } = req.body;
+    if (!id) {
+      error.throwErr(400, 'KEY_ERROR');
+    }
     await moneyFlowService.deleteMoneyFlow(id, userId);
     return res.status(200).json({message: 'DELETE_SUCCESS'});
   } catch (err) {

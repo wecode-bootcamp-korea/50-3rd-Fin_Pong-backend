@@ -11,12 +11,4 @@ const appDataSource = new DataSource({
   database: process.env.TYPEORM_DATABASE
 })
 
-appDataSource.initialize()
-  .then(() => {
-    console.log('Data Source has been initialized!')
-  })
-  .catch((err) => {
-    console.error('Error occured during Data Source initialization', err)
-  })
-
 module.exports = { appDataSource }

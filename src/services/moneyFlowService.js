@@ -198,7 +198,7 @@ const getMoneyFlowsByFamilyUserIdByYearMonthDate = async (familyUserIds, year, m
 }
 
 const updateMoneyFlow = async (id, userId, type, categoryId, memo, amount, year, month, date) => {
-  const typeId = await flowTypeService.getFlowStatusById(type);
+  const typeId = await flowTypeService.getIdByFlowStatus(type);
   if (!typeId) {
     error.throwErr(404, 'NOT_EXISTING_TYPE');
   }
