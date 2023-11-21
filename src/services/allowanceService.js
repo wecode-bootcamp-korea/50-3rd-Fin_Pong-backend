@@ -11,7 +11,7 @@ const getAllowanceByFamilyUserIdsByYearMonthAndGetAmount = async (familyUserIds,
   if (!allowances.length) { // 가족의 용돈이 할당돼 있지 않으면 0으로 사전에 처리합니다.
     return 0;
   }
-  return await allowances.reduce((acc, allowance) => acc + allowance.amount, 0);
+  return await allowances.reduce((acc, allowance) => acc + allowance.allowance, 0);
 }
 
 module.exports = {

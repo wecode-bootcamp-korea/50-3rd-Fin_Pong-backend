@@ -4,7 +4,7 @@ const error = require('../utils/error');
 const getAllowanceByYearMonth = async (userId, year, month) => {
   return await appDataSource.query(
     `
-    SELECT allowances.id, users.name as userName, allowances.amount, allowances.year, allowances.month 
+    SELECT allowances.id, users.name as userName, allowances.amount as allowance, allowances.year, allowances.month 
     FROM allowances 
     JOIN users 
     ON allowances.user_id = users.id
