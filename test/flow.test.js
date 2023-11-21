@@ -271,14 +271,14 @@ describe('delete MoneyFlow', () => {
   });
 
   test('SUCCESS: DELETE MoneyFlow', async () => {
-    const requestBody = {
+    const requestQuery = {
       id: 43
     };
 
     const res = await request(app)
       .delete('/flow')
       .set('Authorization', `Bearer ${supplies.token}`)
-      .send(requestBody); // Use .query() to send parameters in the query string
+      .query(requestQuery); // Use .query() to send parameters in the query string
 
     expect(res.status).toBe(200);
     expect(res.body).toEqual({
@@ -307,14 +307,14 @@ describe('delete MoneyFlow', () => {
   });
 
   test('FAILED: DELETE MoneyFlow', async () => {
-    const requestBody = {
+    const requestQuery = {
       id: 5
     };
 
     const res = await request(app)
       .delete('/flow')
       .set('Authorization', `Bearer ${supplies.token}`)
-      .send(requestBody); // Use .query() to send parameters in the query string
+      .query(requestQuery); // Use .query() to send parameters in the query string
 
     expect(res.status).toBe(409);
     expect(res.body).toEqual({
@@ -322,6 +322,3 @@ describe('delete MoneyFlow', () => {
     });
   });
 });
-
-
-

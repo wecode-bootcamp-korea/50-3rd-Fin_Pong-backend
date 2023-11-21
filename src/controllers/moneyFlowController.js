@@ -93,7 +93,7 @@ const updateMoneyFlow = async (req, res) => {
 const deleteMoneyFlow = async (req, res) => {
   try{
     const { userId } = req.userData;
-    const { id } = req.body;
+    const { id } = req.query;
     if (!id) {
       error.throwErr(400, 'KEY_ERROR');
     }
