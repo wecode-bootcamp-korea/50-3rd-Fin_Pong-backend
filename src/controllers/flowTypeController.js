@@ -10,4 +10,6 @@ const getFlowTypes = async (req, res) => {
   }
 }
 
-module.exports = { getFlowTypes }
+module.exports = {
+  getFlowTypes
+}
