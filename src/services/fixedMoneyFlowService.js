@@ -4,7 +4,6 @@ const userService = require('../services/userService')
 const flowTypeService = require('../services/flowTypeService');
 const error = require('../utils/error');
 const { appDataSource } = require('../utils/dataSource');
-const { postMiddleFixedMoneyFlow } = require('../models/fixedMoneyFlowDao');
 
 const postFixedMoneyFlows = async (userId, type, categoryId, memo, amount, startYear, startMonth, startDate, endYear, endMonth) => {
   try {
