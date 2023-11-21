@@ -1,6 +1,6 @@
 const throwErr = (code, message) => {
   const error = new Error(message);
-  error.status = code;
+  error.statusCode = code;
   throw error;
 };
 

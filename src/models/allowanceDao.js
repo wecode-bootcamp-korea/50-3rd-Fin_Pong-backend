@@ -18,7 +18,7 @@ const postAllowance = async (userId, amount, year, month) => {
 const getAllowance = async (userId) => { // 최신 순
   return await appDataSource.query(
     `
-    SELECT allowances.id, users.name as userName, allowances.amount, allowances.year, allowances.month 
+    SELECT allowances.id, users.name as userName, allowances.amount as allowance as allowance, allowances.year, allowances.month 
     FROM allowances 
     JOIN users 
     ON allowances.user_id = users.id
@@ -32,7 +32,7 @@ const getAllowance = async (userId) => { // 최신 순
 const getAllowanceByYear = async (userId, year) => { // 최신 순
   return await appDataSource.query(
     `
-    SELECT allowances.id, users.name as userName, allowances.amount, allowances.year, allowances.month 
+    SELECT allowances.id, users.name as userName, allowances.amount as allowance, allowances.year, allowances.month 
     FROM allowances 
     JOIN users 
     ON allowances.user_id = users.id
@@ -47,7 +47,7 @@ const getAllowanceByYear = async (userId, year) => { // 최신 순
 const getAllowanceByYearMonth = async (userId, year, month) => {
   return await appDataSource.query(
     `
-    SELECT allowances.id, users.name as userName, allowances.amount, allowances.year, allowances.month 
+    SELECT allowances.id, users.name as userName, allowances.amount as allowance, allowances.year, allowances.month 
     FROM allowances 
     JOIN users 
     ON allowances.user_id = users.id

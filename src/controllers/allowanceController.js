@@ -37,11 +37,11 @@ const getAllowancesByCondition = async (req, res) => { // 일반 유저도 가�
       const userId = await usersFamilyService.getAuthenticUserId(familyId, userName); // familyId 정보와 유저의 이름으로 유저 id를 찾습니다.
       if (!year && !month) { // 연도, 월의 조건이 없는 경우 => 해당 유저의 용돈을 모두 찾습니다.
         const allowances = await allowanceService.getAllowancesByUserId(userId);
-        return res.status(200).json({message: 'GET_SUCCESS', 'budget': allowances});
+        return res.status(200).json({message: 'GET_SUCCESS', allowances: allowances});
       }
       else if (year && !month) { // 연도 조건만 있고, 월 조건은 없는 경우 => 해당 유저의 해당 연도의 모든 용돈을 찾습니다..
         const allowances = await allowanceService.getAllowancesByUserIdByYear(userId, year);
-        return res.status(200).json({message: 'GET_SUCCESS', 'budget': allowances});
+        return res.status(200).json({message: 'GET_SUCCESS', allowances: allowances});
       }
       const allowance = await allowanceService.getAllowanceByUserIdByYearMonth(userId, year, month); // 해당 유저의 해당 연, 월의 용돈을 찾습니다.
       return res.status(200).json({message: 'GET_SUCCESS', allowances: allowance});
@@ -49,11 +49,11 @@ const getAllowancesByCondition = async (req, res) => { // 일반 유저도 가�
     else {
       if (!year && !month) { // 연도, 월의 조건이 없는 경우 => 가족 구성원의 용돈을 모두 찾습니다.
         const allowances = await allowanceService.getAllowances(familyUsersIds);
-        return res.status(200).json({message: 'GET_SUCCESS', 'budget': allowances});
+        return res.status(200).json({message: 'GET_SUCCESS', allowances: allowances});
       }
       else if (year && !month) { // 연도 조건만 있고, 월 조건은 없는 경우 => 가족 구성원의 해당 연도의 모든 용돈을 찾습니다.
         const allowances = await allowanceService.getAllowancesByYear(familyUsersIds, year);
-        return res.status(200).json({message: 'GET_SUCCESS', 'budget': allowances});
+        return res.status(200).json({message: 'GET_SUCCESS', allowances: allowances});
       }
       const allowances = await allowanceService.getAllowanceByUserIdByYearMonth(familyUsersIds, year, month); // 가족 구성원의 해당 연, 월의 용돈을 찾습니다.
       return res.status(200).json({message: 'GET_SUCCESS', allowances: allowances});
@@ -77,7 +77,9 @@ const getRestAllowance = async (req, res) => {
     }
     const userId = await usersFamilyService.getAuthenticUserId(familyId, userName);
     const allowance = await allowanceService.getAllowanceByUserIdByYearMonthAndGetAmount(userId, year, month); // 해당 유저의 해당 연, 월의 용돈을 찾습니다.
+    console.log('>>>>>>>>', allowance)
     const sumOfUsage = await moneyFlowService.getUsedMoneyFlowsByYearMonthAndGetSum(userId, year, month);
+    console.log(sumOfUsage)
     const restAllowance = allowance - sumOfUsage
     return res.status(200).json({message: 'GET_SUCCESS', restAllowance: restAllowance});
   } catch (err) {
@@ -93,6 +95,7 @@ const updateAllowance = async (req, res) => { // 관리자만 가능
       error.throwErr(400, 'NOT_INCLUDED_IN_FAMILY_OR_NOT_AN_ADMIN');
     }
     const { userName, allowance, year, month } = req.body;
+    console.log(userName, allowance, year, month)
     if (!userName || !allowance || !year || !month) {
       error.throwErr(400, 'KEY_ERROR');
     }
@@ -111,7 +114,7 @@ const deleteAllowance = async (req, res) => { // 관리자만 가능
     if (!familyId || !roleId) {
       error.throwErr(400, 'NOT_INCLUDED_IN_FAMILY_OR_NOT_AN_ADMIN');
     }
-    const { userName, year, month } = req.body;
+    const { userName, year, month } = req.query;
     if (!userName || !year || !month) {
       error.throwErr(400, 'KEY_ERROR');
     }

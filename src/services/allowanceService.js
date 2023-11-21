@@ -46,7 +46,7 @@ const getAllowanceByUserIdByYearMonth = async (userId, year, month) => { // 단�
 
 const getAllowanceByUserIdByYearMonthAndGetAmount = async (userId, year, month) => {
   const allowance = await allowanceDao.getAllowanceByYearMonth(userId, year, month);
-  return await allowance.reduce((acc, allowance) => acc + allowance.amount, 0);
+  return await allowance.reduce((acc, allowance) => acc + allowance.allowance, 0);
 }
 
 const updateAllowance = async (userId, allowance, year, month) => { // userName, year, month(수정 전)가 수정 전의 지표인 함수
