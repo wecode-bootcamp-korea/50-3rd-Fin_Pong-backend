@@ -60,7 +60,7 @@ const getMonthlyGeneralSpendingByPrivate = async( userId, year ) => {
       sum(amount) AS spending
     FROM money_flows mf
     JOIN users_families uf ON mf.user_id = uf.user_id
-    WHERE mf.flow_type_id = 2 AND uf.user_id = ? AND mf.year = ? AND mf.category_id = 3
+    WHERE mf.flow_type_id = 2 AND uf.user_id = ? AND mf.year = ?
     GROUP BY month
     ORDER BY month ASC;
 `, [ userId, year ])
@@ -74,7 +74,7 @@ const getMonthlyFixedSpendingByPrivate = async( userId, year ) => {
       sum(amount) AS spending
     FROM fixed_money_flows fmf
     JOIN users_families uf ON fmf.user_id = uf.user_id
-    WHERE fmf.flow_type_id = 2 AND uf.user_id = ? AND fmf.year = ? AND fmf.category_id = 3
+    WHERE fmf.flow_type_id = 2 AND uf.user_id = ? AND fmf.year = ?
     GROUP BY month
     ORDER BY month ASC;
 `, [ userId, year ])
