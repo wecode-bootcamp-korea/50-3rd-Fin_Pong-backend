@@ -96,7 +96,7 @@ const postMoneyFlow = async (req, res) => {
   }
 }
 
-getMoneyFlowsByCondition = async (req, res) => {
+const getMoneyFlowsByCondition = async (req, res) => {
   try {
     const { familyId } = req.userData;
     const { userName, year, month, date } = req.query;
