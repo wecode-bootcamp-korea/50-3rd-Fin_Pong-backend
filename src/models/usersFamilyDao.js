@@ -18,7 +18,7 @@ const getUsersByFamilyId = async (familyId) => { // JOIN 사용해서 users 에�
     `
     SELECT users_families.user_id as 'id', users.name as 'option'
     FROM users_families 
-    JOIN USERS 
+    JOIN users 
     ON users_families.user_id = users.id
     WHERE users_families.family_id = ?
     `,
