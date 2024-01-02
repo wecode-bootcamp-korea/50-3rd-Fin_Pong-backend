@@ -88,27 +88,6 @@ const getMoneyFlowsByCondition = async (req, res) => {
       const moneyFlows = await moneyFlowService.getMoneyFlowsByUserIdByYearMonthDate(userId, year, month, date); // 해당 유저의 해당 연, 월, 날짜의 수입/지출 내역을 찾습니다.
       return res.status(200).json({message: 'GET_SUCCESS', flows: moneyFlows});
     }
-    else if (!userName) {
-      const familyUsersIds = await usersFamilyService.getFamilyUsersIds(familyId);
-      if (!year && !month && !date) { // 연도, 월, 날짜의 조건이 없는 경우 => 해당 유저의 수입/지출내역을 모두 찾습니다.
-        const moneyFlows = await moneyFlowService.getMoneyFlowsByFamilyUserId(familyUsersIds);
-        return res.status(200).json({message: 'GET_SUCCESS', flows: moneyFlows});
-      }
-      else if (year && !month && !date) { // 연도 조건만 있고, 월, 날짜 조건은 없는 경우 => 가족 구성원의 해당 연도의 모든 수입/지출 내역을 찾습니다.
-        const moneyFlows = await moneyFlowService.getMoneyFlowsByFamilyUserIdByYear(familyUsersIds, year);
-        return res.status(200).json({message: 'GET_SUCCESS', flows: moneyFlows});
-      }
-      else if (year && month && !date) { // 연도, 월 조건만 있고, 날짜 조건은 없는 경우
-        const moneyFlows = await moneyFlowService.getMoneyFlowsByFamilyUserIdByYearMonth(familyUsersIds, year, month); // 해당 유저의 해당 연, 월의 수입/지출 내역을 찾습니다.
-        return res.status(200).json({message: 'GET_SUCCESS', flows: moneyFlows});
-      }
-      else if (year && !month && date) { // 월 조건만 없고, 연, 날짜 조건만 있는 경우 (ex.2023년의 매달 1일에 무엇을 쓰고 벌었는 지 알려줘)
-        const moneyFlows = await moneyFlowService.getMoneyFlowsByFamilyUserIdByYearDate(familyUsersIds, year, date); // 해당 유저의 해당 연도의 해당 날짜의 수입/지출 내역들을 찾습니다.
-        return res.status(200).json({message: 'GET_SUCCESS', flows: moneyFlows});
-      }
-      const moneyFlows = await moneyFlowService.getMoneyFlowsByFamilyUserIdByYearMonthDate(familyUsersIds, year, month, date); // 가족 구성원의 해당 연, 월, 날짜의 수입/지출 내역을 찾습니다.
-      return res.status(200).json({message: 'GET_SUCCESS', flows: moneyFlows});
-    }
   } catch (err) {
     console.error(err);
     return res.status(err.statusCode || 500).json({message: err.message || 'INTERNAL_SERVER_ERROR'});
