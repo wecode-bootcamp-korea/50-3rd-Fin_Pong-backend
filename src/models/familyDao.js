@@ -1,4 +1,5 @@
 const { appDataSource } = require('../utils/dataSource');
+const error = require('../utils/error')
 
 const insertUuid  = async(uuid) => {
   const result = await appDataSource.query(`
