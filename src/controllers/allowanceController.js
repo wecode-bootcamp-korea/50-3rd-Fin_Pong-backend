@@ -47,7 +47,7 @@ const getAllowancesByCondition = async (req, res) => { // 일반 유저도 가�
       return res.status(200).json({message: 'GET_SUCCESS', allowances: allowance});
     }
     else {
-      if (!year && !month) { // 연도, 월의 조건이 없는 경우 => 가족 구성원의 용돈을 모두 찾습니다.
+      if (!year && !month) { // 연도, 월의 조건이 없는 경우 => 가족 구성원의 용돈을 모두 찾습니다. // 병합용 주석
         const allowances = await allowanceService.getAllowances(familyUsersIds);
         return res.status(200).json({message: 'GET_SUCCESS', allowances: allowances});
       }
