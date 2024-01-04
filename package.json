@@ -1,0 +1,31 @@
+{
+  "name": "50-3rd-fin_pong-backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "start": "nodemon server.js",
+    "test": "DOTENV_CONFIG_PATH=.env.test jest --setupFiles=dotenv/config"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wecode-bootcamp-korea/50-3rd-Fin_Pong-backend"
+  },
+  "private": true,
+  "devDependencies": {
+    "dotenv": "^16.3.1",
+    "jest": "^29.7.0",
+    "supertest": "^6.3.3",
+    "typeorm": "^0.3.19"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "http": "^0.0.1-security",
+    "jsonwebtoken": "^9.0.2",
+    "morgan": "^1.10.0",
+    "mysql2": "^3.6.5",
+    "nodemon": "^3.0.2",
+    "npm": "^10.2.3"
+  }
+}
