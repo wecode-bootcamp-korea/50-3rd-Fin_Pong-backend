@@ -1,9 +1,6 @@
 # Fin_Pong
 <img width="1623" alt="KakaoTalk_Photo_2024-01-06-12-23-48 001" src="https://github.com/wecode-bootcamp-korea/50-3rd-Fin_Pong-frontend/assets/78453933/a7ffdabd-f703-428f-94f0-b3e8dadb53a8">
 
-- Back-End Developer : 홍영기, 최현수, 정원규
-- Template Designer : 김성호
-
 ## Fin_Pong 소개
 금융관련 서비스를 기획해보고자 결성된 팀<br>
 재밌게 랠리가 가능한 금융지식의 순환을 만들어보자는 의미에서<br> 
