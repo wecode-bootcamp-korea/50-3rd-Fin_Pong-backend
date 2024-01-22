@@ -5,9 +5,9 @@ const getFlowTypes = async () => {
     `
     SELECT id, status as 'option'
     FROM flow_type
-    `
-  )
-}
+    `,
+  );
+};
 
 const getFlowStatusById = async (flowTypeId) => {
   return await appDataSource.query(
@@ -16,9 +16,9 @@ const getFlowStatusById = async (flowTypeId) => {
     FROM flow_type 
     WHERE id = ?
     `,
-    [flowTypeId]
-  )
-}
+    [flowTypeId],
+  );
+};
 
 const getIdByFlowStatus = async (type) => {
   return await appDataSource.query(
@@ -27,12 +27,12 @@ const getIdByFlowStatus = async (type) => {
     FROM flow_type
     WHERE status = ?
     `,
-    [type]
-  )
-}
+    [type],
+  );
+};
 
 module.exports = {
   getFlowTypes,
   getFlowStatusById,
-  getIdByFlowStatus
-}
+  getIdByFlowStatus,
+};

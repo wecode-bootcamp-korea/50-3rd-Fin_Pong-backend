@@ -3,10 +3,11 @@ const router = express.Router();
 
 const { loginRequired } = require('../utils/auth');
 const budgetController = require('../controllers/budgetController');
+router.use(loginRequired);
 
-router.get('/rest', loginRequired, budgetController.getRestBudget);
-router.post('/', loginRequired, budgetController.postBudget);
-router.get('/', loginRequired, budgetController.getBudgetByCondition);
-router.put('/', loginRequired, budgetController.updateBudget);
+router.get('/rest', budgetController.getRestBudget);
+router.post('/', budgetController.postBudget);
+router.get('/', budgetController.getBudgetByCondition);
+router.put('/', budgetController.updateBudget);
 
 module.exports.router = router;

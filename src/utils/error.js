@@ -5,5 +5,5 @@ const throwErr = (code, message) => {
 };
 
 module.exports = {
-  throwErr
-}
+  throwErr,
+};

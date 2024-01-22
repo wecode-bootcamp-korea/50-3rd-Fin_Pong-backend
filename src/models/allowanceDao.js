@@ -7,15 +7,16 @@ const postAllowance = async (userId, amount, year, month) => {
     INSERT IGNORE INTO allowances(user_id, amount, year, month) 
     VALUES(?,?,?,?)
     `,
-    [userId, amount, year, month]
-  )
+    [userId, amount, year, month],
+  );
   if (result.affectedRows === 0) {
     error.throwErr(409, 'ALREADY_EXISTS');
   }
   return result;
-}
+};
 
-const getAllowance = async (userId) => { // 최신 순
+const getAllowance = async (userId) => {
+  // 최신 순
   return await appDataSource.query(
     `
     SELECT allowances.id, users.name as userName, allowances.amount as allowance, allowances.year, allowances.month 
@@ -25,11 +26,12 @@ const getAllowance = async (userId) => { // 최신 순
     WHERE user_id = ?
     ORDER BY allowances.year DESC, allowances.month DESC
     `,
-    [userId]
-  )
-}
+    [userId],
+  );
+};
 
-const getAllowanceByYear = async (userId, year) => { // 최신 순
+const getAllowanceByYear = async (userId, year) => {
+  // 최신 순
   return await appDataSource.query(
     `
     SELECT allowances.id, users.name as userName, allowances.amount as allowance as allowance, allowances.year, allowances.month 
@@ -40,9 +42,9 @@ const getAllowanceByYear = async (userId, year) => { // 최신 순
     AND allowances.year = ?
     ORDER BY allowances.month DESC
     `,
-    [userId, year]
-  )
-}
+    [userId, year],
+  );
+};
 
 const getAllowanceByYearMonth = async (userId, year, month) => {
   return await appDataSource.query(
@@ -55,9 +57,9 @@ const getAllowanceByYearMonth = async (userId, year, month) => {
     AND allowances.year = ?
     AND allowances.month = ?
     `,
-    [userId, year, month]
-  )
-}
+    [userId, year, month],
+  );
+};
 
 const updateAllowance = async (userId, amount, year, month) => {
   return await appDataSource.query(
@@ -68,9 +70,9 @@ const updateAllowance = async (userId, amount, year, month) => {
     AND year = ?
     AND month = ?
     `,
-    [amount, userId, year, month]
-  )
-}
+    [amount, userId, year, month],
+  );
+};
 
 const updateAllowanceById = async (allowanceId, amount, year, month) => {
   const result = await appDataSource.query(
@@ -79,13 +81,13 @@ const updateAllowanceById = async (allowanceId, amount, year, month) => {
     SET amount = ?, year = ?, month = ?
     WHERE id = ? 
     `,
-    [amount, year, month, allowanceId]
-  )
+    [amount, year, month, allowanceId],
+  );
   if (result.affectedRows === 0) {
     error.throwErr(409, 'ALREADY_EXISTS');
   }
   return result;
-}
+};
 
 const deleteAllowance = async (userId, year, month) => {
   const result = await appDataSource.query(
@@ -95,13 +97,13 @@ const deleteAllowance = async (userId, year, month) => {
     AND year = ? 
     AND month = ? 
     `,
-    [userId, year, month]
-  )
+    [userId, year, month],
+  );
   if (result.affectedRows === 0) {
     error.throwErr(404, 'NOT_EXISTING_OR_DELETED_ALLOWANCE');
   }
   return result;
-}
+};
 
 const deleteAllowanceById = async (allowanceId) => {
   const result = await appDataSource.query(
@@ -109,13 +111,28 @@ const deleteAllowanceById = async (allowanceId) => {
     DELETE FROM allowances 
     WHERE id = ? 
     `,
-    [allowanceId]
-  )
+    [allowanceId],
+  );
   if (result.affectedRows === 0) {
     error.throwErr(404, 'NOT_EXISTING_OR_DELETED_ALLOWANCE');
   }
   return result;
-}
+};
+
+const getMonthlyAllowancesByPrivate = async (userId, year) => {
+  return await appDataSource.query(
+    `
+    SELECT
+      user_id,
+      month,
+      amount AS income
+    FROM allowances
+    WHERE user_id = ? AND year = ?
+    ORDER BY month ASC;
+  `,
+    [userId, year],
+  );
+};
 
 module.exports = {
   postAllowance,
@@ -125,5 +142,6 @@ module.exports = {
   updateAllowance,
   updateAllowanceById,
   deleteAllowance,
-  deleteAllowanceById
-}
+  deleteAllowanceById,
+  getMonthlyAllowancesByPrivate, // -홍영기 함수
+};

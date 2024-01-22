@@ -3,9 +3,11 @@ const router = express.Router();
 
 const familyController = require('../controllers/familyController');
 const { loginRequired } = require('../utils/auth');
+const { usersUpdateFilter } = require('../utils/updateFilter');
+router.use(loginRequired);
 
-router.post('/book', loginRequired, familyController.newBook);
-router.post('/join', loginRequired, familyController.joinBook);
-router.get('/auth-code', loginRequired ,familyController.getFamilyAuthCode)
+router.post('/book', familyController.postFamily);
+router.post('/join', familyController.postUsersFamily);
+router.get('/auth-code', familyController.getFamilyAuthCode);
 
 module.exports.router = router;

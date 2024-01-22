@@ -1,8 +1,9 @@
 const { appDataSource } = require('../utils/dataSource');
-const error = require('../utils/error')
+const error = require('../utils/error');
 
-const getUserInfo = async(userId) => {
-  return await appDataSource.query(`
+const getUserInfo = async (userId) => {
+  return await appDataSource.query(
+    `
     SELECT
       u.name AS userName, 
       uf.role_id AS roleId
@@ -10,47 +11,39 @@ const getUserInfo = async(userId) => {
     JOIN users_families uf
     ON u.id = uf.user_id
     WHERE u.id = ?;
-    `, 
-    [userId]
-    )
+    `,
+    [userId],
+  );
 };
 
-const getUserByEmail = async(email) => {
-  const result = await appDataSource.query(
+const getUserByEmail = async (email) => {
+  return await appDataSource.query(
     `
     SELECT * 
     FROM users 
     WHERE email = ?
     `,
-    [email]
-    )
-  if (result.insertId === 0) {
-  error.throwErr(500, 'DATA_INSERTION_FAILED');
-  }
-  else {
-    return result;
-  }
+    [email],
+  );
 };
 
-const createUserByEmail = async(email) => {
+const createUserByEmail = async (email) => {
   const result = await appDataSource.query(
     `
     INSERT INTO users (email) 
     VALUES (?)
     `,
-    [email]
-    );
+    [email],
+  );
 
   if (result.insertId === 0) {
-  error.throwErr(500, 'DATA_INSERTION_FAILED');
-  }
-  else {
+    error.throwErr(500, 'DATA_INSERTION_FAILED');
+  } else {
     return result.insertId;
   }
 };
 
-
-const addInformation = async(name, phoneNumber ,birthdate, email) => {
+const updateUserData = async (name, phoneNumber, birthdate, email) => {
   const result = await appDataSource.query(
     `
     UPDATE users
@@ -59,38 +52,40 @@ const addInformation = async(name, phoneNumber ,birthdate, email) => {
     birthdate = ? 
     WHERE email = ?
     `,
-    [name, phoneNumber, birthdate, email]
-    )
+    [name, phoneNumber, birthdate, email],
+  );
   if (result.insertId === 0) {
-  error.throwErr(500, 'DATA_INSERTION_FAILED');
-  }
-  else {
+    error.throwErr(500, 'DATA_INSERTION_FAILED');
+  } else {
     return result;
   }
 };
 
-const getUserInformationById = async( userId ) => {
-  
-  const [ result ] = await appDataSource.query(`
+const getUserInformationById = async (userId) => {
+  const [result] = await appDataSource.query(
+    `
     SELECT id AS userId
     FROM users
-    WHERE id = ?;
-  `, 
-  [ userId ])
-  const [ result1 ] = await appDataSource.query(`
+    WHERE id = ?
+  `,
+    [userId],
+  );
+  const [result1] = await appDataSource.query(
+    `
     SELECT u.id AS userId, uf.family_id AS familyId, role_id AS roleId
     FROM users u
     JOIN users_families uf 
     ON u.id = uf.user_id
-    WHERE u.id = ?;
-  `, 
-  [ userId ])
+    WHERE u.id = ?
+  `,
+    [userId],
+  );
   if (!result1) {
     return result;
   } else {
     return result1;
   }
-}
+};
 
 const getNameById = async (userId) => {
   return await appDataSource.query(
@@ -99,15 +94,27 @@ const getNameById = async (userId) => {
     FROM users 
     WHERE id = ?
     `,
-    [userId]
-  )
-}
+    [userId],
+  );
+};
+
+const getUserUpdatedAt = async (userId) => {
+  return await appDataSource.query(
+    `
+    SELECT updated_at
+    FROM users
+    WHERE user_id = ?
+    `,
+    [userId],
+  );
+};
 
 module.exports = {
   getUserByEmail,
   createUserByEmail,
-  addInformation,
+  updateUserData,
   getUserInformationById,
   getUserInfo,
   getNameById,
-}
+  getUserUpdatedAt,
+};

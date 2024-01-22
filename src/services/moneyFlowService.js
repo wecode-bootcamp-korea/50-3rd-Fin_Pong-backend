@@ -1,384 +1,429 @@
 const moneyFlowDao = require('../models/moneyFlowDao');
+const fixedMoneyFlowDao = require('../models/fixedMoneyFlowDao');
+const allowanceDao = require('../models/allowanceDao');
 const middleWare = require('../middlewares/index');
-const userService = require('../services/userService');
 const flowTypeService = require('../services/flowTypeService');
-const categoryService = require('../services/categoryService');
+const categoryDao = require('../models/categoryDao');
+const budgetDao = require('../models/budgetDao');
 const error = require('../utils/error');
+const {
+  MoneyFlowHandler,
+  CategorySetHandler,
+  ConcatenatedMoneyFlowsHandler,
+} = require('../utils/arrayUtil');
 
+const search = async (data) => {
+  const query1 = await middleWare.queryBuilder1(data);
+  const result1 = await moneyFlowDao.getConditionalGeneralInfo(query1);
+  for (const element of result1) {
+    element.fixed_status = 0;
+  }
 
-const search = async( data ) => {
-    const query1 = await middleWare.queryBuilder1( data )
-    const result1 = await moneyFlowDao.getConditionalGeneralInfo( query1 )
-    for (i=0; i<result1.length; i++){
-      result1[i].fixed_status = 0
+  const query2 = await middleWare.queryBuilder2(data);
+  const result2 = await moneyFlowDao.getConditionalFixedInfo(query2);
+  for (const element of result2) {
+    element.fixed_status = 1;
+  }
+
+  let result = [];
+  if (data.dateOrder === 'DESC') {
+    result = result1.concat(result2).sort((a, b) => b.date - a.date);
+  } else {
+    result = result1.concat(result2).sort((a, b) => a.date - b.date);
+  }
+  return result;
+};
+
+const getChartDataByYear = async (userId, familyId, year) => {
+  let monthlyIncome = [];
+  let generalConsumption = [];
+  let fixedConsumption = [];
+  let monthlyConsumption = [];
+
+  // const monthNums = Array.from({ length: 12 }, (_, index) => index + 1);
+  /**
+   * 숫자가 많아지면 직접 쓰기 힘듭니다.
+   *
+   * const monthIndex = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+   *
+   * =>
+   *   const monthNums = Array.from({ length: 12 }, (_, index) => index + 1);
+   *
+   *   or
+   *
+   *  let i = 1;
+   *   let monthNums = [];
+   *   while (i <= 12) {
+   *     monthNums.push(i);
+   *     i++;
+   *   }
+   *
+   */
+
+  if (familyId) {
+    try {
+      [monthlyIncome, generalConsumption, fixedConsumption] = await Promise.all([
+        budgetDao.getBudgetAsIncomeByFamilyByYear(familyId, year),
+        moneyFlowDao.getSumOfGeneralMoneyFlowsByFamilyByYearByMonthGroup(2, familyId, year),
+        fixedMoneyFlowDao.getFixedMoneyFlowsSumByFamilyByYearByMonthGroup(2, familyId, year),
+      ]);
+    } catch (err) {
+      console.error('ERROR_FETCHING_FAMILY_ANALYTICS', err);
     }
 
-    const query2 = await middleWare.queryBuilder2( data )
-    const result2 = await moneyFlowDao.getConditionalFixedInfo ( query2 )
-    for (i=0; i<result2.length; i++){
-      result2[i].fixed_status = 1
-    }
-    
-    let result = []
-    if (data.dateOrder==='DESC'){
-      result = result1.concat(result2).sort((a,b) => b.date - a.date)
-    }else{
-      result = result1.concat(result2).sort((a,b) => a.date - b.date)
-    }
-    return result
-}
+    if (generalConsumption.length && fixedConsumption.length) {
+      // 일반, 고정 수입/지출 데이터 둘 다 존재할 경우
+      for (let month = 1; month <= 12; month++) {
+        if (!generalConsumption.find((item) => item.month === month)) {
+          generalConsumption.push({
+            familyId: familyId,
+            month: month,
+            spending: 0,
+          });
+        }
 
-const yearlyView = async( userId, familyId, year) => {
-  let monthlyIncome = []
-  let monthlySpending1 = []
-  let monthlySpending2 = []
-  let monthlySpending = []
-  if(familyId){
-    monthlyIncome =  await moneyFlowDao.getMonthlyIncomeByFamily( familyId, year )
-    monthlySpending1 = await moneyFlowDao.getMonthlyGeneralSpendingByFamily( familyId, year )
-    monthlySpending2 = await moneyFlowDao.getMonthlyFixedSpendingByFamily( familyId, year )
-    for (i=0; i<12; i++){
-      if(!monthlySpending1[i]){
-        monthlySpending1[i] = { family_id : monthlySpending1[0].family_id, month : i+1, spending : 0 }
-      }
-    }
-    for (i=0; i<12; i++){
-      if(!monthlySpending2[i]){
-        monthlySpending2[i] = { family_id : monthlySpending2[0].family_id, month : i+1, spending : 0 }
-      }
-    }
-    monthlySpending = monthlySpending1.map((item, index) => ({
-      family_id: item.family_id,
-      month: item.month,
-      spending: (Number(item.spending) + Number(monthlySpending2[index].spending))
-    }))
-  }else if (userId){
-    monthlyIncome =  await moneyFlowDao.getMonthlyIncomeByPrivate( userId, year )
-    monthlySpending1 = await moneyFlowDao.getMonthlyGeneralSpendingByPrivate( userId, year )
-    monthlySpending2 = await moneyFlowDao.getMonthlyFixedSpendingByPrivate( userId, year )
-    for (i=0; i<12; i++){
-      if(!monthlySpending1[i]){
-        monthlySpending1[i] = { user_id : monthlySpending1[0].user_id, month : i+1, spending : 0 }
-      }
-    }
-    if(monthlySpending2.length==0){
-      for (i=0; i<monthlySpending1.length; i++){
-        monthlySpending1[i].spending = Number(monthlySpending1[i].spending)
-      }
-      monthlySpending = monthlySpending1
-    }else{
-      for (i=0; i<12; i++){
-        if(!monthlySpending2[i]){
-          monthlySpending2[i] = { user_id : monthlySpending2[0].user_id, month : i+1, spending : 0 }
+        if (!fixedConsumption.find((item) => item.month === month)) {
+          fixedConsumption.push({
+            familyId: familyId,
+            month: month,
+            spending: 0,
+          });
         }
       }
-      monthlySpending = monthlySpending1.map((item, index) => ({
-        family_id: item.family_id,
-        month: item.month,
-        spending: (Number(item.spending) + Number(monthlySpending2[index].spending))
-      }))
-    }
-  }
-  const monthIndex = [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
-  let incomeTable = {}
-  for (let i = 0; i < monthIndex.length; i++) {
-      incomeTable[monthIndex[i] + '월'] = 0
-  }
-  for(i=0;i<monthlyIncome.length;i++){
-    incomeTable[monthlyIncome[i].month + '월'] = Number( monthlyIncome[i].income )
-  }
-  let spendingTable = {}
-  for (let i = 0; i < monthIndex.length; i++) {
-      spendingTable[monthIndex[i] + '월'] = 0
-  }
-  for(i=0;i<monthlySpending.length;i++){
-    spendingTable[monthlySpending[i].month + '월'] = Number( monthlySpending[i].spending )
-  }
-  return [ incomeTable, spendingTable ]
-}
 
-const categoryView = async( userId, familyId, year, month ) => {
-  let result = []
-  let result1 = []
-  let result2 = []
-  if(familyId){
-    result1 = await moneyFlowDao.getThisMonthGeneralSpendingByFamily( familyId, year, month )
-    result2 = await moneyFlowDao.getThisMonthFixedSpendingByFamily( familyId, year, month )
-    for(i=0; i<result1.length; i++){
-      result1[i].spending = Number(result1[i].spending)
+      /**
+       * 두 배열을 12개의 원소를 월별로 오름차순으로 정렬하지 않고 원소를 할당하는 코드로 확장될 경우에 대비하여
+       * .find()를 사용하는 방식으로 전환하였습니다.
+       */
+      monthlyConsumption = generalConsumption.map((generalConsumption) => {
+        const matchingFixedConsumption = fixedConsumption.find(
+          (fixedConsumption) => fixedConsumption.month === generalConsumption.month,
+        );
+        return {
+          family_id: familyId,
+          month: generalConsumption.month,
+          spending:
+            Number(generalConsumption.spending) +
+            (matchingFixedConsumption ? Number(matchingFixedConsumption.spending) : 0),
+        };
+      });
+    } else if (!generalConsumption.length && !fixedConsumption.length) {
+      // 둘 다 data가 없을 경우 빠르게
+      console.log(
+        `${familyId}번 가족의 ${year}년도의 예산 및 지출 데이터는 없습니다.\nProcess Starts`,
+      ); // 가족 전체의 수입/지출 내역이 전혀 없을 경우, db에서 아무것도 조회되지 않았음을 로그에 찍어 Mysql Server 부하로 인한 붕괴 error case와 구분하기 편하게 하기 위해서 작성하였습니다.
+      let _month = 1;
+
+      while (_month <= 12) {
+        console.log(`\nprocess ${_month}월 진행 중 ...`);
+
+        monthlyConsumption.push({
+          familyId: familyId,
+          month: _month,
+          spending: 0,
+        });
+        console.log(`\nprocess ${_month}월 진행 완료`);
+        _month++;
+      }
+      console.log('Process Ends');
     }
-    for(i=0; i<result2.length; i++){
-      result2[i].spending = Number(result2[i].spending)
+  }
+  // family에 가입하지 않은 사용자의 용돈을 기준으로 data call
+  else if (userId) {
+    try {
+      [monthlyIncome, generalConsumption, fixedConsumption] = await Promise.all([
+        allowanceDao.getMonthlyAllowancesByPrivate(userId, year),
+        moneyFlowDao.getSumOfGeneralMoneyFlowsByPrivateByYearByMonthGroup(2, userId, year),
+        fixedMoneyFlowDao.getFixedMoneyFlowsSumByPrivateByYearByMonthGroup(2, userId, year),
+      ]);
+    } catch (err) {
+      console.error('ERROR_FETCHING_USER_ANALYTICS', err);
     }
-    for(j=0; j<result1.length; j++){
-      for(i=0; i<result2.length; i++){
-        if(result1[j].category == result2[i].category){
-          result1[j].spending = result1[j].spending + result2[i].spending
-          result2.splice(i,i+1)
+
+    if (generalConsumption.length && fixedConsumption.length) {
+      // 일반, 고정 수입/지출 데이터 둘 다 존재할 경우
+      for (let month = 1; month <= 12; month++) {
+        if (!generalConsumption.find((item) => item.month === month)) {
+          generalConsumption.push({
+            userId: userId,
+            month: month,
+            spending: 0,
+          });
+        }
+
+        if (!fixedConsumption.find((item) => item.month === month)) {
+          fixedConsumption.push({ userId: userId, month: month, spending: 0 });
         }
       }
-    }
-    result = result1.concat(result2)
-  }else if (userId){
-    result1 = await moneyFlowDao.getThisMonthGeneralSpendingByPrivate( userId, year, month )
-    result2 = await moneyFlowDao.getThisMonthFixedSpendingByPrivate( userId, year, month )
-    for(i=0; i<result1.length; i++){
-      result1[i].spending = Number(result1[i].spending)
-    }
-    for(i=0; i<result2.length; i++){
-      result2[i].spending = Number(result2[i].spending)
-    }
-    for(j=0; j<result1.length; j++){
-      for(i=0; i<result2.length; i++){
-        if(result1[j].category == result2[i].category){
-          result1[j].spending = result1[j].spending + result2[i].spending
-          result2.splice(i,i+1)
-        }
-      }
-    }
-    result = result1.concat(result2)
-  }
-  
-  const category = await moneyFlowDao.getCategory()
-  for (j=0; j<result.length; j++){
-    for (i=0; i<category.length; i++){
-      if(category[i].category===result[j].category){
-        category[i].spending = Number(result[j].spending)
-      }
-    }
-  }
-  for (i=0; i<category.length; i++){
-    if(!category[i].spending){category[i].spending = 0} 
-  }
-  let max = 0
-  for (i=0; i<category.length; i++){
-    max = max + Number(category[i].spending)}
 
-  for (i=0; i<category.length; i++){
-    category[i].spending = Math.round(category[i].spending*100 / max ) + '%'
+      /**
+       * 두 배열을 12개의 원소를 월별로 오름차순으로 정렬하지 않고 원소를 할당하는 코드로 확장될 경우에 대비하여
+       * .find()를 사용하는 방식으로 전환하였습니다.
+       */
+      monthlyConsumption = generalConsumption.map((generalConsumption) => {
+        const matchingFixedConsumption = fixedConsumption.find(
+          (fixedConsumption) => fixedConsumption.month === generalConsumption.month,
+        );
+        return {
+          userId: userId,
+          month: generalConsumption.month,
+          spending:
+            Number(generalConsumption.spending) +
+            (matchingFixedConsumption ? Number(matchingFixedConsumption.spending) : 0),
+        };
+      });
+    } else if (!generalConsumption.length && !fixedConsumption.length) {
+      // 둘 다 data가 없을 경우 빠르게
+      console.log(
+        `${userId}번 사용자의 ${year}년도의 용돈 및 지출 데이터는 없습니다.\nProcess Starts`,
+      ); // 개인의 수입/지출 내역이 전혀 없을 경우, db에서 아무것도 조회되지 않았음을 로그에 찍어 Mysql Server 부하로 인한 붕괴 error case와 구분하기 편하게 하기 위해서 작성하였습니다.
+      let _month = 1;
+
+      while (_month <= 12) {
+        console.log(`\nprocess ${_month}월 진행 중 ...`);
+
+        monthlyConsumption.push({
+          userId: userId,
+          month: _month,
+          spending: 0,
+        });
+        console.log(`\nprocess ${_month}월 진행 완료`);
+        _month++;
+      }
+      console.log('Process Ends');
+    }
   }
-  
-  return category
-}
+
+  let incomeTable = {};
+  for (const element of monthlyIncome) {
+    incomeTable[element.month + '월'] = element['income'];
+  }
+  let _i = 1;
+  while (_i < 12) {
+    if (!incomeTable[_i + '월']) {
+      incomeTable[_i + '월'] = 0;
+    }
+    _i++;
+  }
+
+  let spendingTable = {};
+  for (const element of monthlyConsumption) {
+    spendingTable[element.month + '월'] = element.spending;
+  }
+  let _j = 1;
+  while (_j < 12) {
+    if (!incomeTable[_i + '월']) {
+      incomeTable[_i + '월'] = 0;
+    }
+    _j++;
+  }
+
+  return [incomeTable, spendingTable];
+};
+
+const getChartDataByCategory = async (userId, familyId, year, month) => {
+  let result = [];
+  let result1 = [];
+  let result2 = [];
+  if (familyId) {
+    [result1, result2] = await Promise.all([
+      await moneyFlowDao.getSumOfGeneralMoneyFlowsByFamilyByYearMonthByCategoryGroup(
+        2,
+        familyId,
+        year,
+        month,
+      ),
+      await fixedMoneyFlowDao.getFixedMoneyFlowsSumByFamilyByYearMonthByCategoryGroup(
+        2,
+        familyId,
+        year,
+        month,
+      ),
+    ]);
+
+    result = await CategorySetHandler.changeArraysIntoCategorySetArray(result1, result2);
+  } else if (userId) {
+    [result1, result2] = await Promise.all([
+      await moneyFlowDao.getSumOfGeneralMoneyFlowsByPrivateByYearMonthByCategoryGroup(
+        2,
+        userId,
+        year,
+        month,
+      ),
+      await fixedMoneyFlowDao.getFixedMoneyFlowsSumByPrivateByYearMonthByCategoryGroup(
+        2,
+        userId,
+        year,
+        month,
+      ),
+    ]);
+
+    result = await CategorySetHandler.changeArraysIntoCategorySetArray(result1, result2);
+  }
+
+  const categories = await categoryDao.getCategories();
+  const sumOfFlowsByCategory = await Promise.all(
+    categories.map(async (category) => {
+      //  0이어서 db에서 안 나온 category는 spending: 0, 카테고리에 지출이 있어서 find()에 걸리면 그 값을 더해 줍니다.
+      const matchingResults = result.map((groupResults) =>
+        groupResults.find((element) => element.category === category.category),
+      );
+
+      const totalConsumptionByCategory = matchingResults.reduce(
+        (sum, element) => sum + (element ? element.spending : 0),
+        0,
+      );
+
+      return {
+        ...category,
+        spending: totalConsumptionByCategory,
+      };
+    }),
+  );
+
+  const totalConsumption = sumOfFlowsByCategory.reduce((sum, element) => sum + element.spending, 0);
+
+  const normalizedByCategory = sumOfFlowsByCategory.map((category) => ({
+    // totalConsumption이 0일 때, 카테고리별 지출이 0으로 할당됩니다.
+    ...category,
+    spending:
+      totalConsumption !== 0
+        ? `${Math.round((Number(category.spending) * 100) / totalConsumption)}%`
+        : '0%',
+  }));
+  return normalizedByCategory;
+};
 
 const postMoneyFlow = async (userId, type, categoryId, memo, amount, year, month, date) => {
   const typeId = await flowTypeService.getIdByFlowStatus(type);
   if (!typeId) {
     error.throwErr(404, 'NOT_EXISTING_TYPE');
   }
-  return await moneyFlowDao.postMoneyFlow(userId, typeId, categoryId, memo, amount, year, month, date);
-}
+  return await moneyFlowDao.postMoneyFlow(
+    userId,
+    typeId,
+    categoryId,
+    memo,
+    amount,
+    year,
+    month,
+    date,
+  );
+};
 
 const getMoneyFlowsByUserId = async (userId) => {
-  const flows = await moneyFlowDao.getMoneyFlowsByUserId(userId);
-  return await Promise.all(flows.map( async (flow) => ({
-      id: flow.id,
-      userName: await userService.getNameById(flow.user_id),
-      flowType: await flowTypeService.getFlowStatusById(flow.flow_type_id),
-      category: await categoryService.getNameById(flow.category_id),
-      memo: flow.memo,
-      amount: flow.amount,
-      year: flow.year,
-      month: flow.month,
-      date: flow.date,
-    }
-  )))
-}
+  // userId를 가진 사용자의 수입/지출 내역을 전부 조회합니다.
+  return await MoneyFlowHandler.mapMoneyFlows(await moneyFlowDao.getMoneyFlowsByUserId(userId));
+};
 
-const getMoneyFlowsByFamilyUserId = async (familyUserIds) => {
-  let familyUserFlows = [];
-  for (let i in familyUserIds) {
-    const flows = await moneyFlowDao.getMoneyFlowsByUserId(familyUserIds[i]);
-    familyUserFlows = familyUserFlows.concat(await Promise.all(flows.map(async (flow) => {
-      return {
-        id: flow.id,
-        userName: await userService.getNameById(flow.user_id),
-        flowType: await flowTypeService.getFlowStatusById(flow.flow_type_id),
-        category: await categoryService.getNameById(flow.category_id),
-        memo: flow.memo,
-        amount: flow.amount,
-        year: flow.year,
-        month: flow.month,
-        date: flow.date,
-      };
-    })));
-  }
-  return familyUserFlows;
-}
+const getMoneyFlowsByFamilyUserIds = async (familyUserIds) => {
+  // 가족에 포함된 사용자들의 수입/지출 내역을 조회합니다.
+  return await ConcatenatedMoneyFlowsHandler.concatMoneyFlowsArrays(
+    familyUserIds,
+    moneyFlowDao.getMoneyFlowsByUserId,
+    familyUserIds,
+  );
+};
 
 const getMoneyFlowsByFamilyUserIdByYear = async (familyUserIds, year) => {
-  let familyUserFlows = [];
-  for (let i in familyUserIds) {
-    const flows = await moneyFlowDao.getMoneyFlowsByUserIdByYear(familyUserIds[i], year);
-    familyUserFlows = familyUserFlows.concat(await Promise.all(flows.map(async (flow) => {
-      return {
-        id: flow.id,
-        userName: await userService.getNameById(flow.user_id),
-        flowType: await flowTypeService.getFlowStatusById(flow.flow_type_id),
-        category: await categoryService.getNameById(flow.category_id),
-        memo: flow.memo,
-        amount: flow.amount,
-        year: flow.year,
-        month: flow.month,
-        date: flow.date,
-      };
-    })));
-  }
-  return familyUserFlows;
-}
+  return await ConcatenatedMoneyFlowsHandler.concatMoneyFlowsArrays(
+    familyUserIds,
+    moneyFlowDao.getMoneyFlowsByUserIdByYear,
+    year,
+  );
+};
 
 const getMoneyFlowsByUserIdByYear = async (userId, year) => {
-  const flows = await moneyFlowDao.getMoneyFlowsByUserIdByYear(userId, year);
-  return await Promise.all(flows.map( async (flow) => ({
-      id: flow.id,
-      userName: await userService.getNameById(flow.user_id),
-      flowType: await flowTypeService.getFlowStatusById(flow.flow_type_id),
-      category: await categoryService.getNameById(flow.category_id),
-      memo: flow.memo,
-      amount: flow.amount,
-      year: flow.year,
-      month: flow.month,
-      date: flow.date,
-    }
-  )))
-}
+  return await MoneyFlowHandler.mapMoneyFlows(
+    await moneyFlowDao.getMoneyFlowsByUserIdByYear(userId, year),
+  );
+};
 
 const getMoneyFlowsByUserIdByYearMonth = async (userId, year, month) => {
-  const flows = await moneyFlowDao.getMoneyFlowsByUserIdByYearMonth(userId, year, month);
-  return await Promise.all(flows.map( async (flow) => ({
-      id: flow.id,
-      userName: await userService.getNameById(flow.user_id),
-      flowType: await flowTypeService.getFlowStatusById(flow.flow_type_id),
-      category: await categoryService.getNameById(flow.category_id),
-      memo: flow.memo,
-      amount: flow.amount,
-      year: flow.year,
-      month: flow.month,
-      date: flow.date,
-    }
-  )))
-}
+  return await MoneyFlowHandler.mapMoneyFlows(
+    await moneyFlowDao.getMoneyFlowsByUserIdByYearMonth(userId, year, month),
+  );
+};
 
 const getMoneyFlowsByFamilyUserIdByYearMonth = async (familyUserIds, year, month) => {
-  let familyUserFlows = [];
-  for (let i in familyUserIds) {
-    const flows = await moneyFlowDao.getMoneyFlowsByUserIdByYearMonth(familyUserIds[i], year, month);
-    familyUserFlows = familyUserFlows.concat(await Promise.all(flows.map(async (flow) => {
-      return {
-        id: flow.id,
-        userName: await userService.getNameById(flow.user_id),
-        flowType: await flowTypeService.getFlowStatusById(flow.flow_type_id),
-        category: await categoryService.getNameById(flow.category_id),
-        memo: flow.memo,
-        amount: flow.amount,
-        year: flow.year,
-        month: flow.month,
-        date: flow.date,
-      };
-    })));
-  }
-  return familyUserFlows;
-}
+  return await ConcatenatedMoneyFlowsHandler.concatMoneyFlowsArrays(
+    familyUserIds,
+    moneyFlowDao.getMoneyFlowsByUserIdByYearMonth,
+    year,
+    month,
+  );
+};
 
-const getUsedMoneyFlowsByYearMonthAndGetSum = async (userId, year, month) => {
+const getUsedMoneySumFlowsByYearMonth = async (userId, year, month) => {
   let flowTypeId = 2;
-  const flows = await moneyFlowDao.getUsedOrGotMoneyFlowsByUserIdByYearMonth(userId, flowTypeId, year, month);
+  const flows = await moneyFlowDao.getUsedOrGotMoneyFlowsByUserIdByYearMonth(
+    userId,
+    flowTypeId,
+    year,
+    month,
+  );
   return await flows.reduce((acc, flow) => acc + flow.amount, 0);
-}
+};
 
 const getMoneyFlowsByUserIdByYearDate = async (userId, year, date) => {
-  const flows = await moneyFlowDao.getMoneyFlowsByUserIdByYearDate(userId, year, date);
-  return await Promise.all(flows.map( async (flow) => ({
-      id: flow.id,
-      userName: await userService.getNameById(flow.user_id),
-      flowType: await flowTypeService.getFlowStatusById(flow.flow_type_id),
-      category: await categoryService.getNameById(flow.category_id),
-      memo: flow.memo,
-      amount: flow.amount,
-      year: flow.year,
-      month: flow.month,
-      date: flow.date,
-    }
-  )))
-}
+  return await MoneyFlowHandler.mapMoneyFlows(
+    await moneyFlowDao.getMoneyFlowsByUserIdByYearDate(userId, year, date),
+  );
+};
 
 const getMoneyFlowsByFamilyUserIdByYearDate = async (familyUserIds, year, date) => {
-  let familyUserFlows = [];
-  for (let i in familyUserIds) {
-    const flows = await moneyFlowDao.getMoneyFlowsByUserIdByYearDate(familyUserIds[i], year, date);
-    familyUserFlows = familyUserFlows.concat(await Promise.all(flows.map(async (flow) => {
-      return {
-        id: flow.id,
-        userName: await userService.getNameById(flow.user_id),
-        flowType: await flowTypeService.getFlowStatusById(flow.flow_type_id),
-        category: await categoryService.getNameById(flow.category_id),
-        memo: flow.memo,
-        amount: flow.amount,
-        year: flow.year,
-        month: flow.month,
-        date: flow.date,
-      };
-    })));
-  }
-  return familyUserFlows;
-}
+  return await ConcatenatedMoneyFlowsHandler.concatMoneyFlowsArrays(
+    await moneyFlowDao.getMoneyFlowsByUserIdByYearDate,
+    year,
+    date,
+  );
+};
 
 const getMoneyFlowsByUserIdByYearMonthDate = async (userId, year, month, date) => {
-  const flows = await moneyFlowDao.getMoneyFlowsByUserIdByYearMonthDate(userId, year, month, date);
-  return await Promise.all(flows.map( async (flow) => ({
-      id: flow.id,
-      userName: await userService.getNameById(flow.user_id),
-      flowType: await flowTypeService.getFlowStatusById(flow.flow_type_id),
-      category: await categoryService.getNameById(flow.category_id),
-      memo: flow.memo,
-      amount: flow.amount,
-      year: flow.year,
-      month: flow.month,
-      date: flow.date,
-    }
-  )))
-}
+  return await MoneyFlowHandler.mapMoneyFlows(
+    await moneyFlowDao.getMoneyFlowsByUserIdByYearMonthDate(userId, year, month, date),
+  );
+};
 
-const getMoneyFlowsByFamilyUserIdByYearMonthDate = async (familyUserIds, year, month, date) => {
-  let familyUserFlows = [];
-  for (let i in familyUserIds) {
-    const flows = await moneyFlowDao.getMoneyFlowsByUserIdByYearMonthDate(familyUserIds[i], year, month, date);
-    familyUserFlows = familyUserFlows.concat(await Promise.all(flows.map(async (flow) => {
-      return {
-        id: flow.id,
-        userName: await userService.getNameById(flow.user_id),
-        flowType: await flowTypeService.getFlowStatusById(flow.flow_type_id),
-        category: await categoryService.getNameById(flow.category_id),
-        memo: flow.memo,
-        amount: flow.amount,
-        year: flow.year,
-        month: flow.month,
-        date: flow.date,
-      };
-    })));
-  }
-  return familyUserFlows;
-}
+const getMoneyFlowsByFamilyUserIdsByYearMonthDate = async (familyUserIds, year, month, date) => {
+  return await ConcatenatedMoneyFlowsHandler.concatMoneyFlowsArrays(
+    familyUserIds,
+    moneyFlowDao.getMoneyFlowsByUserIdByYearMonthDate,
+    year,
+    month,
+    date,
+  );
+};
 
 const updateMoneyFlow = async (id, userId, type, categoryId, memo, amount, year, month, date) => {
   const typeId = await flowTypeService.getIdByFlowStatus(type);
   if (!typeId) {
     error.throwErr(404, 'NOT_EXISTING_TYPE');
   }
-  return await moneyFlowDao.updateMoneyFlow(id, userId, typeId, categoryId, memo, amount, year, month, date);
-}
+  return await moneyFlowDao.updateMoneyFlow(
+    id,
+    userId,
+    typeId,
+    categoryId,
+    memo,
+    amount,
+    year,
+    month,
+    date,
+  );
+};
 
 const deleteMoneyFlow = async (id, userId) => {
   return await moneyFlowDao.deleteMoneyFlow(id, userId);
-}
+};
 
 module.exports = {
   search,
-  yearlyView,
-  categoryView,
+  getChartDataByYear,
+  getChartDataByCategory,
   postMoneyFlow,
   getMoneyFlowsByUserId,
-  getMoneyFlowsByFamilyUserId,
+  getMoneyFlowsByFamilyUserIds,
   getMoneyFlowsByUserIdByYear,
   getMoneyFlowsByFamilyUserIdByYear,
   getMoneyFlowsByUserIdByYearMonth,
@@ -386,8 +431,8 @@ module.exports = {
   getMoneyFlowsByUserIdByYearDate,
   getMoneyFlowsByFamilyUserIdByYearDate,
   getMoneyFlowsByUserIdByYearMonthDate,
-  getUsedMoneyFlowsByYearMonthAndGetSum,
-  getMoneyFlowsByFamilyUserIdByYearMonthDate,
+  getUsedMoneySumFlowsByYearMonth,
+  getMoneyFlowsByFamilyUserIdsByYearMonthDate,
   updateMoneyFlow,
-  deleteMoneyFlow
-}
+  deleteMoneyFlow,
+};

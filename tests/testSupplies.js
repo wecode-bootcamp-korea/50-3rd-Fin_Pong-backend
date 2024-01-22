@@ -1,4 +1,5 @@
-const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6Imp3azIzNDVAbmF2ZXIuY29tIiwiaWQiOjEsImlhdCI6MTcwMDIwMjIwM30.ZHLV5b0pDYzaMbdlQtIVqTT63hy02eOi1pZNuE4_qx4'
+const token =
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6Imp3azIzNDVAbmF2ZXIuY29tIiwiaWQiOjEsImlhdCI6MTcwMDIwMjIwM30.ZHLV5b0pDYzaMbdlQtIVqTT63hy02eOi1pZNuE4_qx4';
 
 const startQuery = [
   `SET foreign_key_checks = 0`,
@@ -1171,8 +1172,8 @@ const startQuery = [
   `INSERT INTO ALLOWANCES(user_id, amount, year, month) VALUES(12,80000,2023,9)`,
   `INSERT INTO ALLOWANCES(user_id, amount, year, month) VALUES(12,80000,2023,10)`,
   `INSERT INTO ALLOWANCES(user_id, amount, year, month) VALUES(12,80000,2023,11)`,
-  `INSERT INTO ALLOWANCES(user_id, amount, year, month) VALUES(12,80000,2023,12)`
-]
+  `INSERT INTO ALLOWANCES(user_id, amount, year, month) VALUES(12,80000,2023,12)`,
+];
 
 const truncate = [
   `SET foreign_key_checks = 0`,
@@ -1188,12 +1189,11 @@ const truncate = [
   `TRUNCATE fixed_money_flows`,
   `TRUNCATE fixed_money_flows_group`,
   `TRUNCATE middle_fixed_money_flows`,
-  `SET foreign_key_checks = 1`
-]
-
+  `SET foreign_key_checks = 1`,
+];
 
 module.exports = {
   token,
   truncate,
   startQuery,
-}
+};

@@ -1,5 +1,12 @@
 const { appDataSource } = require('../utils/dataSource');
 
+const getCategories = async () => {
+  return await appDataSource.query(`
+    SELECT * 
+    FROM categories;
+`);
+};
+
 const getCategoriesByIds = async (categoryIds) => {
   return await appDataSource.query(
     `
@@ -7,9 +14,9 @@ const getCategoriesByIds = async (categoryIds) => {
     FROM categories
     WHERE id IN (?)
     `,
-    [categoryIds]
-  )
-}
+    [categoryIds],
+  );
+};
 
 const getIdByCategoryName = async (category) => {
   return await appDataSource.query(
@@ -18,9 +25,9 @@ const getIdByCategoryName = async (category) => {
     FROM categories
     WHERE category = ? 
     `,
-    [category]
-  )
-}
+    [category],
+  );
+};
 
 const getNameById = async (categoryId) => {
   return await appDataSource.query(
@@ -29,12 +36,13 @@ const getNameById = async (categoryId) => {
     FROM categories 
     WHERE id = ?
     `,
-    [categoryId]
-  )
-}
+    [categoryId],
+  );
+};
 
 module.exports = {
+  getCategories,
   getCategoriesByIds,
   getIdByCategoryName,
-  getNameById
-}
+  getNameById,
+};

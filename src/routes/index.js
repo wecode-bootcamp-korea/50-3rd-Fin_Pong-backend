@@ -17,7 +17,7 @@ router.use('/family/user', usersFamilyRouter.router);
 router.use('/flow', moneyFlowRouter.router);
 router.use('/flow/fixed', fixedMoneyFlowRouter.router);
 router.use('/budget', budgetRouter.router);
-router.use('/allowance', allowanceRouter.router)
+router.use('/allowance', allowanceRouter.router);
 router.use('/users', userRouter.router);
 router.use('/family', familyRouter.router);
 

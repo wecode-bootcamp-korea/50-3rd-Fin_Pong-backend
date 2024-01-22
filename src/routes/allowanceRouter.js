@@ -3,11 +3,12 @@ const router = express.Router();
 
 const { loginRequired } = require('../utils/auth');
 const allowanceController = require('../controllers/allowanceController');
+router.use(loginRequired);
 
-router.get('/', loginRequired,  allowanceController.getAllowancesByCondition);
-router.get('/rest', loginRequired,  allowanceController.getRestAllowance);
-router.post('/', loginRequired, allowanceController.postAllowance);
-router.put('/', loginRequired, allowanceController.updateAllowance);
-router.delete('/', loginRequired, allowanceController.deleteAllowance);
+router.get('/', allowanceController.getAllowancesByCondition);
+router.get('/rest', allowanceController.getRestAllowance);
+router.post('/', allowanceController.postAllowance);
+router.put('/', allowanceController.updateAllowance);
+router.delete('/', allowanceController.deleteAllowance);
 
 module.exports.router = router;

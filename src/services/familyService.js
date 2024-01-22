@@ -1,25 +1,25 @@
 const familyDao = require('../models/familyDao');
+const usersFamilyDao = require('../models/usersFamilyDao');
 const middleWare = require('../middlewares/index');
 
-const newBook = async(userData) => {
-  const uuid = await middleWare.makeUuid();
-  const familyId = await familyDao.insertUuid( uuid );
-  const result = await familyDao.insertUserFamilyId(userData, familyId);
+const postFamily = async (userData, roleId) => {
+  const uuid = await middleWare.createCustomUuid();
+  const familyId = await familyDao.postFamilyWithUuid(uuid);
+  await usersFamilyDao.postUsersFamily(userData, familyId, roleId);
   return uuid;
 };
 
-const joinBook = async(userData, authCode) => {
-  const findFamilyId = await familyDao.findFamilyId(authCode)
-  return result = await familyDao.addFamilyBook(userData.userId, findFamilyId[0].familyId);
+const postUsersFamily = async (userData, authCode, roleId) => {
+  const findFamilyId = await familyDao.findFamilyId(authCode);
+  return await usersFamilyDao.postUsersFamily(userData.userId, findFamilyId[0].familyId, roleId);
 };
 
-const getFamilyAuthCode = async( familyId ) => {
-  const findFamilyAuthCode = await familyDao.getFamilyAuthCode( familyId )
-  return findFamilyAuthCode;
+const getFamilyAuthCode = async (familyId) => {
+  return await familyDao.getFamilyAuthCode(familyId);
 };
 
 module.exports = {
-  newBook,
-  joinBook,
+  postFamily,
+  postUsersFamily,
   getFamilyAuthCode,
-}
+};
