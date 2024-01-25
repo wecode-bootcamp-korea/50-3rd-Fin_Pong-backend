@@ -1,5 +1,5 @@
 const familyService = require('../services/familyService');
-const ResponseHandler = require('../utils/http');
+const { httpResponseHandler } = require('../utils/response');
 
 const postFamily = async (req, res) => {
   // 관리자로서의 가족 그룹 생성
@@ -28,7 +28,7 @@ const postUsersFamily = async (req, res) => {
     const roleId = 0;
     await familyService.postUsersFamily(userData, authCode, roleId);
     // FrontEnd Server와 조율해서 POST로 수정해서 메세지 통일 필요
-    return ResponseHandler.sendSuccessResponse(res, 201, 'JOIN');
+    return httpResponseHandler.sendSuccessResponse(res, 201, 'JOIN');
   } catch (err) {
     console.error(err);
     return res
@@ -41,7 +41,7 @@ const getFamilyAuthCode = async (req, res) => {
   try {
     const familyId = req.userData.familyId;
     const result = await familyService.getFamilyAuthCode(familyId);
-    return ResponseHandler.sendSuccessResponse(res, 200, 'GET', 'authCode', result);
+    return httpResponseHandler.sendSuccessResponse(res, 200, 'GET', 'authCode', result);
   } catch (err) {
     console.error(err);
     return res

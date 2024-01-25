@@ -1,7 +1,7 @@
 const fixedMoneyFlowService = require('../services/fixedMoneyFlowService');
 const categoryService = require('../services/categoryService');
 const error = require('../utils/error');
-const ResponseHandler = require('../utils/http');
+const { httpResponseHandler } = require('../utils/response');
 
 const postFixedFlows = async (req, res) => {
   // 관리자만 가능
@@ -38,7 +38,7 @@ const postFixedFlows = async (req, res) => {
       endYear,
       endMonth,
     );
-    return ResponseHandler.sendSuccessResponse(res, 200, 'POST');
+    return httpResponseHandler.sendSuccessResponse(res, 200, 'POST');
   } catch (err) {
     console.error(err);
     return res
@@ -60,7 +60,7 @@ const getFixedMoneyFlowsByCondition = async (req, res) => {
     } else if (!year && !month && !date) {
       // 연도, 월, 날짜의 조건이 없는 경우 => 해당 가족의 고정 수입/지출내역을 모두 찾습니다.
       const fixedMoneyFlows = await fixedMoneyFlowService.getFixedMoneyFlows(userId);
-      return ResponseHandler.sendSuccessResponse(res, 200, 'GET', 'flows', fixedMoneyFlows);
+      return httpResponseHandler.sendSuccessResponse(res, 200, 'GET', 'flows', fixedMoneyFlows);
     } else if (year && month && !date) {
       // 연도, 월 조건만 있고, 날짜 조건은 없는 경우
       const fixedMoneyFlows = await fixedMoneyFlowService.getFixedMoneyFlowsByYearMonth(
@@ -68,7 +68,7 @@ const getFixedMoneyFlowsByCondition = async (req, res) => {
         year,
         month,
       ); // 해당 연, 월의 고정 수입/지출 내역을 찾습니다.
-      return ResponseHandler.sendSuccessResponse(res, 200, 'GET', 'flows', fixedMoneyFlows);
+      return httpResponseHandler.sendSuccessResponse(res, 200, 'GET', 'flows', fixedMoneyFlows);
     } else if (year && !month && date) {
       // 월 조건만 없고, 연, 날짜 조건만 있는 경우 (ex.2023년의 매달 1일에 무엇을 쓰고 벌었는 지 알려줘)
       const fixedMoneyFlows = await fixedMoneyFlowService.getFixedMoneyFlowsByYearDate(
@@ -76,7 +76,7 @@ const getFixedMoneyFlowsByCondition = async (req, res) => {
         year,
         date,
       ); // 해당 연도의 해당 날짜의 고정 수입/지출 내역들을 찾습니다.
-      return ResponseHandler.sendSuccessResponse(res, 200, 'GET', 'flows', fixedMoneyFlows);
+      return httpResponseHandler.sendSuccessResponse(res, 200, 'GET', 'flows', fixedMoneyFlows);
     }
     const fixedMoneyFlows = await fixedMoneyFlowService.getFixedMoneyFlowsByYearMonthDate(
       userId,
@@ -84,7 +84,7 @@ const getFixedMoneyFlowsByCondition = async (req, res) => {
       month,
       date,
     ); // 해당 유저의 해당 연, 월, 날짜의 수입/지출 내역을 찾습니다.
-    return ResponseHandler.sendSuccessResponse(res, 200, 'GET', 'flows', fixedMoneyFlows);
+    return httpResponseHandler.sendSuccessResponse(res, 200, 'GET', 'flows', fixedMoneyFlows);
   } catch (err) {
     console.error(err);
     return res
@@ -112,7 +112,7 @@ const updateFixedMoneyFlows = async (req, res) => {
       category,
       memo,
     );
-    return ResponseHandler.sendSuccessResponse(res, 200, 'PUT');
+    return httpResponseHandler.sendSuccessResponse(res, 200, 'PUT');
   } catch (err) {
     console.error(err);
     return res
@@ -134,7 +134,7 @@ const deleteFixedMoneyFlows = async (req, res) => {
     const groupId = await fixedMoneyFlowService.getGroupIdByFlowId(id);
     const fixedFlowIds = await fixedMoneyFlowService.getFlowIdsByGroupId(groupId);
     await fixedMoneyFlowService.deleteFixedMoneyFlows(fixedFlowIds, groupId, year, month, date);
-    return ResponseHandler.sendSuccessResponse(res, 200, 'DELETE');
+    return httpResponseHandler.sendSuccessResponse(res, 200, 'DELETE');
   } catch (err) {
     console.error(err);
     return res

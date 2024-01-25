@@ -3,7 +3,7 @@ const allowanceService = require('../services/allowanceService');
 const usersFamilyService = require('../services/usersFamilyService');
 const fixedMoneyFlowService = require('../services/fixedMoneyFlowService');
 const error = require('../utils/error');
-const ResponseHandler = require('../utils/http');
+const { httpResponseHandler } = require('../utils/response');
 
 const postBudget = async (req, res) => {
   // 관리자만 가능
@@ -19,7 +19,7 @@ const postBudget = async (req, res) => {
     }
     await budgetService.postBudget(familyId, budget, year, month);
 
-    return ResponseHandler.sendSuccessResponse(res, 200, 'POST');
+    return httpResponseHandler.sendSuccessResponse(res, 200, 'POST');
   } catch (err) {
     console.error(err);
     return res
@@ -45,14 +45,14 @@ const getBudgetByCondition = async (req, res) => {
     } else if (!year && !month) {
       // 연도, 월의 조건이 없는 경우 => 해당 가족의 예산을 모두 보여 줍니다.
       const budget = await budgetService.getBudget(familyId);
-      return ResponseHandler.sendSuccessResponse(res, successCode, 'GET', 'budget', budget);
+      return httpResponseHandler.sendSuccessResponse(res, successCode, 'GET', 'budget', budget);
     } else if (year && !month) {
       // 연도 조건만 있고, 월 조건은 없는 경우 => 해당 연도의 모든 예산을 보여 줍니다.
       const budget = await budgetService.getBudgetByYear(familyId, year);
-      return ResponseHandler.sendSuccessResponse(res, successCode, 'GET', 'budget', budget);
+      return httpResponseHandler.sendSuccessResponse(res, successCode, 'GET', 'budget', budget);
     }
     const budget = await budgetService.getBudgetByYearMonth(familyId, year, month); // 연도, 월 조건 모두 있는 경우 => 해당 연, 월의 예산을 보여 줍니다.
-    return ResponseHandler.sendSuccessResponse(res, successCode, 'GET', 'budget', budget);
+    return httpResponseHandler.sendSuccessResponse(res, successCode, 'GET', 'budget', budget);
   } catch (err) {
     console.error(err);
     return res
@@ -85,7 +85,7 @@ const getRestBudget = async (req, res) => {
         month,
       );
     const restBudget = budget - sumOfAllowances - sumOfFixedMoneyFlows;
-    return ResponseHandler.sendSuccessResponse(res, 200, 'GET', 'restBudget', restBudget);
+    return httpResponseHandler.sendSuccessResponse(res, 200, 'GET', 'restBudget', restBudget);
   } catch (err) {
     console.error(err);
     return res
@@ -106,7 +106,7 @@ const updateBudget = async (req, res) => {
       error.throwErr(400, 'KEY_ERROR');
     }
     await budgetService.updateBudget(familyId, budget, year, month);
-    return ResponseHandler.sendSuccessResponse(res, 200, 'PUT');
+    return httpResponseHandler.sendSuccessResponse(res, 200, 'PUT');
   } catch (err) {
     console.error(err);
     return res

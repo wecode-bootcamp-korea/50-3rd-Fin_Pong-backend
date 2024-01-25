@@ -44,7 +44,7 @@ class CategorySetHandler {
    * @returns {Promise<Object[][]>} 카테고리별로 합산된 배열 집합을 반환합니다.
    */
   static async changeArraysIntoCategorySetArray(array1, array2) {
-    const changeArraysResult = [array1, array2].map((resultArray) => {
+    return [array1, array2].map((resultArray) => {
       const sumOfFlowObject = {};
 
       for (const element of resultArray) {
@@ -62,8 +62,6 @@ class CategorySetHandler {
         spending,
       }));
     });
-
-    return changeArraysResult;
   }
 }
 

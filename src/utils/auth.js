@@ -16,8 +16,7 @@ const loginRequired = async (req, res, next) => {
         error.throwErr(404, 'USER_DOES_NOT_EXIST');
       }
       req.user = user;
-      const userInfo = await userDao.getUserInformationById(user.id); // family에 가입하지 않은 경우에 { userId: user.id} 만 return합니다.
-      req.userData = userInfo;
+      req.userData = await userDao.getUserInformationById(user.id); // family에 가입하지 않은 경우에 { userId: user.id} 만 return합니다.
       next();
     } else {
       error.throwErr(401, 'SOMETHING_WENT_WRONG'); // 정확한 오류 원인을 알려주면 보안상으로 취약합니다. - 최현수

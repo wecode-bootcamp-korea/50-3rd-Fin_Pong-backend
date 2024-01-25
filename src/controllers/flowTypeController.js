@@ -1,16 +1,10 @@
 const flowTypeService = require('../services/flowTypeService');
-const ResponseHandler = require('../utils/http');
+const { httpResponseHandler } = require('../utils/response');
 
 const getFlowTypes = async (req, res) => {
   try {
     const flowTypes = await flowTypeService.getFlowTypes();
-    return ResponseHandler.sendSuccessResponse(
-      res,
-      200,
-      'GET',
-      'types',
-      flowTypes,
-    );
+    return httpResponseHandler.sendSuccessResponse(res, 200, 'GET', 'types', flowTypes);
   } catch (err) {
     console.error(err);
     return res

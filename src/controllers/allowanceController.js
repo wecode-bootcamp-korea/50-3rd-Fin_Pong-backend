@@ -2,7 +2,7 @@ const allowanceService = require('../services/allowanceService');
 const usersFamilyService = require('../services/usersFamilyService');
 const moneyFlowService = require('../services/moneyFlowService');
 const error = require('../utils/error');
-const ResponseHandler = require('../utils/http');
+const { httpResponseHandler } = require('../utils/response');
 
 const postAllowance = async (req, res) => {
   // 관리자만 가능
@@ -21,7 +21,7 @@ const postAllowance = async (req, res) => {
     }
     const userId = await usersFamilyService.getAuthenticUserId(familyId, userName);
     await allowanceService.postAllowance(userId, allowance, year, month);
-    return ResponseHandler.sendSuccessResponse(res, 200, 'POST');
+    return httpResponseHandler.sendSuccessResponse(res, 200, 'POST');
   } catch (err) {
     console.error(err);
     return res

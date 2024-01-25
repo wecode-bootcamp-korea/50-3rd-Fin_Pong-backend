@@ -22,7 +22,7 @@ const getBudgetByYearMonthAndGetAmount = async (familyId, year, month) => {
   if (!budget.length) {
     return 0;
   }
-  const amount = budget[0].budget;
+  const amount = budget[0]['budget'];
   return await amount;
 };
 

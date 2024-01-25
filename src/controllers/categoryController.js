@@ -1,6 +1,6 @@
 const categoryService = require('../services/categoryService');
 const error = require('../utils/error');
-const ResponseHandler = require('../utils/http');
+const { httpResponseHandler } = require('../utils/response');
 
 const getCategory = async (req, res) => {
   try {
@@ -9,7 +9,7 @@ const getCategory = async (req, res) => {
       error.throwErr(400, 'KEY_ERROR');
     }
     const categories = await categoryService.getCategory(type);
-    return ResponseHandler.sendSuccessResponse(res, 200, 'GET', 'category', categories);
+    return httpResponseHandler.sendSuccessResponse(res, 200, 'GET', 'category', categories);
   } catch (err) {
     console.error(err);
     return res

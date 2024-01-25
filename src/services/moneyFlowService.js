@@ -25,13 +25,11 @@ const search = async (data) => {
     element.fixed_status = 1;
   }
 
-  let result = [];
   if (data.dateOrder === 'DESC') {
-    result = result1.concat(result2).sort((a, b) => b.date - a.date);
+    return result1.concat(result2).sort((a, b) => b.date - a.date);
   } else {
-    result = result1.concat(result2).sort((a, b) => a.date - b.date);
+    return result1.concat(result2).sort((a, b) => a.date - b.date);
   }
-  return result;
 };
 
 const getChartDataByYear = async (userId, familyId, year) => {
@@ -283,7 +281,7 @@ const getChartDataByCategory = async (userId, familyId, year, month) => {
 
   const totalConsumption = sumOfFlowsByCategory.reduce((sum, element) => sum + element.spending, 0);
 
-  const normalizedByCategory = sumOfFlowsByCategory.map((category) => ({
+  return sumOfFlowsByCategory.map((category) => ({
     // totalConsumption이 0일 때, 카테고리별 지출이 0으로 할당됩니다.
     ...category,
     spending:
@@ -291,7 +289,6 @@ const getChartDataByCategory = async (userId, familyId, year, month) => {
         ? `${Math.round((Number(category.spending) * 100) / totalConsumption)}%`
         : '0%',
   }));
-  return normalizedByCategory;
 };
 
 const postMoneyFlow = async (userId, type, categoryId, memo, amount, year, month, date) => {

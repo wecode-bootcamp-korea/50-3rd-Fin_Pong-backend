@@ -48,6 +48,7 @@ describe('get MonthlyViewByFamily', () => {
 
     expect(res.status).toBe(200);
     expect(res.body).toEqual({
+      message: 'GET_SUCCESS',
       INCOME: {
         '1월': 3000000,
         '2월': 3500000,
@@ -106,6 +107,7 @@ describe('get MonthlyViewByPrivate', () => {
 
     expect(res.status).toBe(200);
     expect(res.body).toEqual({
+      message: 'GET_SUCCESS',
       INCOME: {
         '1월': 500000,
         '2월': 600000,

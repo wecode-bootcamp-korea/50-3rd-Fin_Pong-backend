@@ -3,7 +3,7 @@ const usersFamilyDao = require('../models/usersFamilyDao');
 const middleWare = require('../middlewares/index');
 
 const postFamily = async (userData, roleId) => {
-  const uuid = await middleWare.createCustomUuid();
+  const uuid = middleWare.createCustomUuid();
   const familyId = await familyDao.postFamilyWithUuid(uuid);
   await usersFamilyDao.postUsersFamily(userData, familyId, roleId);
   return uuid;

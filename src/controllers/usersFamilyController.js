@@ -1,6 +1,6 @@
 const usersFamilyService = require('../services/usersFamilyService');
 const error = require('../utils/error');
-const ResponseHandler = require('../utils/http');
+const { httpResponseHandler } = require('../utils/response');
 
 const getUsersFamilyByUsersId = async (req, res) => {
   try {
@@ -9,7 +9,7 @@ const getUsersFamilyByUsersId = async (req, res) => {
       error.throwErr(400, 'NOT_INCLUDED_IN_FAMILY');
     }
     const familyUsers = await usersFamilyService.getUserIdByFamilyId(familyId);
-    return ResponseHandler.sendSuccessResponse(res, 200, 'GET', 'familyUsers', familyUsers);
+    return httpResponseHandler.sendSuccessResponse(res, 200, 'GET', 'familyUsers', familyUsers);
   } catch (err) {
     console.error(err);
     return res
