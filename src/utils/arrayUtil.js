@@ -89,8 +89,41 @@ class ConcatenatedMoneyFlowsHandler {
   }
 }
 
+/**
+ * A utility class for custom sorting operations.
+ *
+ * @class CustomSorter
+ */
+class CustomSorter {
+  /**
+   * Sorts an array using custom logic.
+   *
+   * If elements are numeric strings, they are sorted numerically. Otherwise, they are sorted alphabetically.
+   *
+   * @static
+   * @param {Array} array - 정렬 대상 배열입니다.
+   * @returns {Array} 정렬된 배열입니다.
+   * @memberof CustomSorter
+   */
+  static sortCustomBasic(array) {
+    // [숫자 또는 숫자만으로 이루어진 문자열 - 문자열] 순서, 숫자는 [숫자의 크기] 오름차순, 문자열은 [시작 문자 오름차순]으로 정렬합니다.
+    return array.sort((a, b) => {
+      const numA = parseInt(a);
+      const numB = parseInt(b);
+
+      if (!isNaN(numA) && !isNaN(numB)) {
+        // 둘 다 number로 변환될 경우
+        return numA - numB;
+      }
+
+      return a.localeCompare(b); // numeric ASCII code가 alphabetic data ASCII code 보다 항상 작습니다.
+    });
+  }
+}
+
 module.exports = {
   MoneyFlowHandler,
   CategorySetHandler,
   ConcatenatedMoneyFlowsHandler,
+  CustomSorter,
 };
